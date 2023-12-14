@@ -28,7 +28,7 @@ const postSchema = new Schema(
     // 게시글 태그들
     tag: { type: [String] },
     // 여행 세부 장소들
-    schedules: { type: [[singleSchedule]], required: true },
+    schedules: { type: [[SingleSchedule]], ref: 'SingleSchedule', required: true },
     // 세부 장소들 사이 거리
     distances: { type: [[Number]], required: true },
     // 여행 경비
@@ -48,5 +48,6 @@ const postSchema = new Schema(
   },
 );
 
+const SingleSchedule = mongoose.model('SingleSchedule', singleSchedule);
 const Post = mongoose.model('Post', postSchema);
 export default Post;
