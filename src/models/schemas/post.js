@@ -42,12 +42,11 @@ const postSchema = new Schema(
     isPublic: {
       type: Boolean,
       default: false,
-      require: true,
     },
     // 찜(즐겨찾기) 수
-    postBookMarkCount: { type: Number, require: true },
+    postBookMarkCount: { type: Number, default: 0 },
     // 댓글 수
-    commentCount: { type: Number, require: true },
+    commentCount: { type: Number, default: 0 },
     // 댓글들
     comment: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
     // 후기글
