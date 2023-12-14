@@ -20,11 +20,11 @@ const postSchema = new Schema(
     // 게시물 메인 타이틀
     title: { type: String, required: true },
     // 여행 지역명
-    travelDestination: { type: String, required: true },
+    destination: { type: String, required: true },
     // 여행 시작 날짜
-    travelStartDate: { type: Date, required: true },
+    startDate: { type: Date, required: true },
     // 여행 마지막 날짜
-    travelEndDate: { type: Date, required: true },
+    endDate: { type: Date, required: true },
     // 게시글 태그들
     tag: { type: [String] },
     // 여행 세부 장소들
@@ -32,9 +32,9 @@ const postSchema = new Schema(
     // 세부 장소들 사이 거리
     distances: { type: [[Number]], required: true },
     // 여행 경비
-    travelCost: { type: Number, required: true },
+    cost: { type: Number, required: true },
     // 여행 인원수
-    travelPeopleCount: { type: Number, required: true },
+    peopleCount: { type: Number, required: true },
     // 게시글 공개 or 비공개 유무
     isPublic: {
       type: Boolean,
