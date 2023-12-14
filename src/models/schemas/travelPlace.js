@@ -1,6 +1,8 @@
 import { Schema } from 'mongoose';
 
 const travelPlaceSchema = new Schema({
+  // 해당 게시글의 ObjectId
+  postId: { type: Schema.Types.ObjectId, ref: 'Post', require: true },
   // 여행 데이 (첫째날, 둘째날...)
   travelDay: { type: Number, require: true },
   // 장소

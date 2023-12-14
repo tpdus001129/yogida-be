@@ -7,8 +7,8 @@ const reCommentSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Comment',
     },
-    // 대댓글을 쓴 사용자의 Object ? String ?
-    writerId: { type: String, require: true },
+    // 작성자의 ObjectId
+    senderId: { type: Schema.Types.ObjectId, ref: 'User', require: true },
     // 대댓글의 내용
     content: { type: String, require: true },
   },
