@@ -1,19 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
 
-const TravelTypeTag = [
-  '체험·액티비티',
-  'SNS 핫플레이스',
-  '자연적인',
-  '유명 관광지',
-  '힐링',
-  '문화·예술·역사',
-  '맛집 탐방',
-];
-
-const TravelMateTag = ['혼자', '친구와', '연인과', '아이와', '부모님과', '반려견과', '기타'];
-
-const AgeGroup = [10, 20, 30, 40, 50, 60, 70];
-
 const postSchema = new Schema(
   {
     // 사용자의 닉네임
@@ -29,11 +15,7 @@ const postSchema = new Schema(
     // 여행 마지막 날짜
     travelEndDate: { type: Date, required: true },
     // 게시글 태그들
-    tag: {
-      travelTypeTag: { type: String, enum: TravelTypeTag },
-      travelMateTag: { type: String, enum: TravelMateTag },
-      ageGroup: { type: Number, enum: AgeGroup },
-    },
+    tag: { type: [String] },
     // 여행 세부 장소들
     travelPlace: [{ type: Schema.Types.ObjectId, ref: 'TravelPlace', required: true }],
     // 여행 경비
