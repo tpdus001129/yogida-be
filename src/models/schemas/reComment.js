@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
-const reCommentSchema = new Schema(
+const replySchema = new Schema(
   {
     // 부모 댓글 참조
     parentComment: {
@@ -8,7 +8,7 @@ const reCommentSchema = new Schema(
       ref: 'Comment',
     },
     // 작성자의 ObjectId
-    senderId: { type: Schema.Types.ObjectId, ref: 'User', require: true },
+    authorId: { type: Schema.Types.ObjectId, ref: 'User', require: true },
     // 대댓글의 내용
     content: { type: String, require: true },
   },
@@ -17,5 +17,5 @@ const reCommentSchema = new Schema(
   },
 );
 
-const ReComment = mongoose.model('ReComment', reCommentSchema);
-export default ReComment;
+const Reply = mongoose.model('Reply', replySchema);
+export default Reply;
