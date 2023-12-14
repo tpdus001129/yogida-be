@@ -7,7 +7,7 @@ const bookmarkSchema = new Schema({
   },
   travelPlace: {
     type: Schema.Types.ObjectId,
-    ref: 'TravelPlace',
+    ref: 'singleSchedule',
   },
 });
 
