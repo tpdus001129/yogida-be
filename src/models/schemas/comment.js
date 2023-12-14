@@ -5,7 +5,7 @@ const commentSchema = new Schema(
     // 해당 게시글의 ObjectId
     postId: { type: Schema.Types.ObjectId, ref: 'Post', required: true },
     // 작성자의 ObjectId
-    senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    authorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     // 댓글 내용
     content: { type: String, required: true },
   },
