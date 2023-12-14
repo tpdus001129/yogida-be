@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 const reCommentSchema = new Schema(
   {
@@ -17,4 +17,5 @@ const reCommentSchema = new Schema(
   },
 );
 
-export default reCommentSchema;
+const ReComment = mongoose.model('ReComment', reCommentSchema);
+export default ReComment;

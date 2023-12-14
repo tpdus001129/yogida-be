@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 const travelPlaceSchema = new Schema({
   // 해당 게시글의 ObjectId
@@ -17,4 +17,5 @@ const travelPlaceSchema = new Schema({
   distance: { type: Number, require: true },
 });
 
-export default travelPlaceSchema;
+const TravelPlace = mongoose.model('TravelPlace', travelPlaceSchema);
+export default TravelPlace;

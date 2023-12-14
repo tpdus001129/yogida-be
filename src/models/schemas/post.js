@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 const TravelTypeTag = [
   '체험·액티비티',
@@ -57,4 +57,5 @@ const postSchema = new Schema(
   },
 );
 
-export default postSchema;
+const Post = mongoose.model('Post', postSchema);
+export default Post;
