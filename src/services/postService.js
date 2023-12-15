@@ -4,6 +4,10 @@ export async function getAllPosts() {
   try {
     const posts = await Post.find({}).exec();
 
+    if (!posts || posts.length === 0) {
+      return { status: 400, message: '게시글이 없습니다.' };
+    }
+
     return posts;
   } catch (err) {
     throw new Error(err);
@@ -12,7 +16,13 @@ export async function getAllPosts() {
 
 export async function getPostById(_id) {
   try {
-    return await Post.findOne({ _id }).exec();
+    const post = await Post.findOne({ _id }).exec();
+
+    if (!post || post.length === 0) {
+      return { status: 400, message: '게시글이 없습니다.' };
+    }
+
+    return post;
   } catch (err) {
     throw new Error(err);
   }
@@ -38,6 +48,7 @@ export async function createPost(postProps) {
   const travelDays = dtMs / (1000 * 60 * 60 * 24);
 
   // 등록된 여행 날짜와 디데이 불일치 또는 세부 장소와 거리 갯수 불일치 시 오류 반환
+  // 오류 메시지를 각각 다르게 정확한 이유로 넘겨야할지, 묶어서 오류 메시지를 넘길지 고민
   if (singleScheduleLength !== travelDays || singleSchedulePlaceCounts.length !== distancesCounts.length) {
     return { status: 400, message: '게시글을 생성하는 중에 문제가 발생했습니다.' };
   }
@@ -52,9 +63,9 @@ export async function createPost(postProps) {
 
 export async function updatePost(_id, postDate) {
   try {
-    const result = await Post.updateOne({ _id }, postDate).exec();
+    const post = await Post.updateOne({ _id }, postDate).exec();
 
-    if (!result) {
+    if (!post) {
       return { status: 400, message: '수정 실패' };
     }
 
@@ -66,9 +77,9 @@ export async function updatePost(_id, postDate) {
 
 export async function deletePostById(_id) {
   try {
-    const result = await Post.deleteOne({ _id }).exec();
+    const post = await Post.deleteOne({ _id }).exec();
 
-    if (!result) {
+    if (!post) {
       return { status: 400, message: '선택삭제 실패' };
     }
 
