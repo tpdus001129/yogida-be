@@ -18,6 +18,18 @@ const config = {
   db: {
     host: isRequired('MONGO_HOST'),
   },
+  kakao: {
+    auth: {
+      restApiKey: isRequired('REST_API_KEY'),
+      redirectUri: isRequired('REDIRECT_URI'),
+      clientId: isRequired('CLIENT_ID'),
+      finishUri: isRequired('FINISH_URI'),
+    },
+  },
+  jwt: {
+    secretKey: isRequired('JWT_SECRET_KEY'),
+    expiresSec: isRequired('JWT_EXPIRES_SEC'),
+  },
 };
 
 export default config;
