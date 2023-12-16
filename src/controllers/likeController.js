@@ -1,5 +1,6 @@
 import * as likeService from '../services/likeService.js';
 
+// 찜한 코스 전체 조회
 export async function getAllLike(req, res) {
   const { postId } = req.params;
   try {
@@ -14,6 +15,7 @@ export async function getAllLike(req, res) {
   }
 }
 
+// 특정 게시물에 찜하기
 export async function createLike(req, res) {
   const { postId } = req.params;
   const { userId } = req.body;
@@ -25,12 +27,24 @@ export async function createLike(req, res) {
   }
 }
 
+// 특정 게시물에 찜 취소
 export async function deleteLike(req, res) {
   const { postId } = req.params;
   const { userId } = req.body;
   try {
     const unlike = await likeService.deleteLike(userId, postId);
     res.status(200).json(unlike);
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+}
+
+// 찜하기 전체 취소
+export async function deleteAllLike(req, res) {
+  const { userId } = req.body;
+  try {
+    const allUnlike = await likeService.deleteAllLike(userId);
+    res.status(200).json(allUnlike);
   } catch (error) {
     res.status(500).json({ error: error });
   }

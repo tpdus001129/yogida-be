@@ -21,7 +21,7 @@ export async function createComment(authorId, postId, content, parentComment = n
       if (!parentComment) {
         throw new Error('첫번째 댓글을 찾을 수 없습니다.');
       }
-      const newReply = new Reply({ parentComment: parentComment, authorId, content });
+      const newReply = new Reply({ parentComment, authorId, content });
       const reply = await newReply.save();
 
       parentComment.reply.push(reply._id);
