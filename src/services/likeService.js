@@ -1,7 +1,7 @@
 import Like from '../models/schemas/like.js';
 import Post from '../models/schemas/post.js';
 
-// 내가 한 좋아요의 게시물 리스트 조회
+// 찜한 코스 전체 조회
 export async function getAllLike(userId) {
   try {
     const likePosts = await Like.find({ userId }).select('postId');
@@ -14,24 +14,32 @@ export async function getAllLike(userId) {
   }
 }
 
-// 특정 게시물에 좋아요
+// 특정 게시물에 찜하기
 export async function createLike(userId, postId) {
   try {
-    const like = await Like.create({ userId, postId });
-    console.log(like);
+    await Like.create({ userId, postId });
   } catch (error) {
     console.error(error);
-    throw new Error('좋아요를 실패했습니다.');
+    throw new Error('찜을 실패했습니다.');
   }
 }
 
-// 특정 게시물에 좋아요 취소
+// 특정 게시물에 찜 취소
 export async function deleteLike(userId, postId) {
   try {
-    const unlike = await Like.findOneAndDelete({ userId, postId });
-    console.log(unlike);
+    await Like.findOneAndDelete({ userId, postId });
   } catch (error) {
     console.error(error);
-    throw new Error('좋아요 취소를 실패했습니다.');
+    throw new Error('찜 취소를 실패했습니다.');
+  }
+}
+
+// 찜하기 전체 취소
+export async function deleteAllLike(userId) {
+  try {
+    await Like.deleteMany({ userId });
+  } catch (error) {
+    console.error(error);
+    throw new Error('찜하기 전체 취소를 실패했습니다.');
   }
 }
