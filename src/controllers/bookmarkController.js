@@ -18,7 +18,7 @@ export async function createBookmark(req, res, next) {
   try {
     const { _id } = req.params;
     const bookmarkItem = req.body;
-    const result = await bookmarkService.createBookmark({ _id, bookmarkItem });
+    const result = await bookmarkService.createBookmark(_id, bookmarkItem);
 
     if (!result) {
       return res.status(400).json({ status: 400, message: '해당 북마크를 찾을 수 없습니다.' });

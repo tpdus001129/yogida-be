@@ -6,7 +6,7 @@ export async function getAllPost(req, res, next) {
 
     res.json({
       status: 200,
-      posts: posts,
+      posts,
     });
   } catch (err) {
     next(err);
@@ -81,7 +81,7 @@ export async function deletePostById(req, res, next) {
     const post = await postService.deletePostById(_id);
 
     if (post === null) {
-      return res.status(404).json({ status: 404, message: '해당 게시글이 존재하지 않습니다.' });
+      return res.status(404).json({ status: 400, message: '해당 게시글이 존재하지 않습니다.' });
     }
 
     res.status(200).json({

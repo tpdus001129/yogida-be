@@ -69,7 +69,7 @@ export async function updatePost(_id, postDate) {
       return { status: 400, message: '수정 실패' };
     }
 
-    return { status: 200, message: '수정 성공' };
+    return post;
   } catch (err) {
     throw new Error(err);
   }
@@ -77,13 +77,13 @@ export async function updatePost(_id, postDate) {
 
 export async function deletePostById(_id) {
   try {
-    const post = await Post.deleteOne({ _id }).exec();
+    const post = await Post.findByIdAndDelete({ _id }).exec();
 
     if (!post) {
-      return { status: 400, message: '선택삭제 실패' };
+      return { status: 400, message: '게시글을 찾을 수 없습니다.' };
     }
 
-    return { status: 200, message: '선택삭제 성공' };
+    return post;
   } catch (err) {
     throw new Error(err);
   }
@@ -95,10 +95,11 @@ export async function deleteAllPosts(postList) {
   }
 
   try {
-    for (let post of postList) {
-      await Post.deleteOne({ _id: post }).exec();
-    }
-    return;
+    await Promise.all(
+      postList.map(async (post) => {
+        await postList.deleteOne({ _id: post }).exec();
+      }),
+    );
   } catch (err) {
     throw new Error(err);
   }
