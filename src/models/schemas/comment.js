@@ -8,6 +8,8 @@ const commentSchema = new Schema(
     authorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     // 댓글 내용
     content: { type: String, required: true },
+    // 대댓글 참조
+    reply: [{ type: Schema.Types.ObjectId, ref: 'Reply' }],
   },
   {
     timestamps: true,
