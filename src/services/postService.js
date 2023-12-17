@@ -1,6 +1,6 @@
 import Post from '../models/schemas/post.js';
 
-export async function getAllPosts() {
+export async function getAllPost() {
   try {
     const posts = await Post.find({}).exec();
 
@@ -89,7 +89,7 @@ export async function deletePostById(_id) {
   }
 }
 
-export async function deleteAllPosts(postList) {
+export async function deleteAllPost(postList) {
   if (!postList) {
     throw new Error('상품 정보가 없습니다.');
   }

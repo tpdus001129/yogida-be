@@ -1,5 +1,5 @@
 import express from 'express';
-import * as postController from '../../controllers/postController';
+import * as postController from '../../controllers/postController.js';
 
 const postRouter = express.Router();
 
@@ -16,7 +16,7 @@ postRouter.post('/posts', postController.createPost);
 postRouter.put('/posts/:id', postController.updatePost);
 
 // 게시글 전체 삭제
-postRouter.delete('/posts', postController.deleteAllPosts);
+postRouter.delete('/posts', postController.deleteAllPost);
 
 // 게시글 선택 삭제
 postRouter.delete('/posts/:id', postController.deletePostById);

@@ -1,4 +1,4 @@
-import * as bookmarkService from '../services/bookmarkService';
+import * as bookmarkService from '../services/bookmarkService.js';
 
 export async function getAllBookmarksById(req, res, next) {
   try {
@@ -33,7 +33,7 @@ export async function createBookmark(req, res, next) {
 export async function deleteAllBookmarks(req, res, next) {
   try {
     const bookmarkList = req.body;
-    await bookmarkService.deleteAllBookmarks(bookmarkList);
+    await bookmarkService.deleteAllBookmark(bookmarkList);
 
     res.status(200).json({
       status: 200,

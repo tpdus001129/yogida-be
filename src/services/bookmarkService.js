@@ -42,7 +42,7 @@ export async function deleteBookmarkById(_id) {
   }
 }
 
-export async function deleteAllBookmarks(bookmarkList) {
+export async function deleteAllBookmark(bookmarkList) {
   if (!bookmarkList) {
     throw new Error('북마크 정보가 없습니다.');
   }

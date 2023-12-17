@@ -50,4 +50,5 @@ const postSchema = new Schema(
 
 const SingleSchedule = mongoose.model('SingleSchedule', singleSchedule);
 const Post = mongoose.model('Post', postSchema);
-export default Post;
+
+export { Post, SingleSchedule };

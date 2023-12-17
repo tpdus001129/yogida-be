@@ -2,7 +2,7 @@ import * as postService from '../services/postService.js';
 
 export async function getAllPost(req, res, next) {
   try {
-    const posts = await postService.getAllPosts();
+    const posts = await postService.getAllPost();
 
     res.json({
       status: 200,
@@ -61,10 +61,10 @@ export async function updatePost(req, res, next) {
   }
 }
 
-export async function deleteAllPosts(req, res, next) {
+export async function deleteAllPost(req, res, next) {
   try {
     const postList = req.body;
-    await postService.deleteAllPosts(postList);
+    await postService.deleteAllPost(postList);
 
     res.status(200).json({
       status: 200,
