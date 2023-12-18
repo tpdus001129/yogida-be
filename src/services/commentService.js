@@ -1,10 +1,10 @@
-import Comment from '../models/schemas/comment.js';
-import Reply from '../models/schemas/reply.js';
+import Comment from '../models/schemas/Comment.js';
+import Reply from '../models/schemas/Reply.js';
 
 // 1. 게시물에 있는 댓글 조회
-export async function getAllComment(postId) {
+export async function getComments(postId) {
   try {
-    const comments = await Comment.find({ postId }).populate('reply').exec();
+    const comments = await Comment.find({ postId }).populate('reply');
     return comments;
   } catch (error) {
     console.error(error);
@@ -13,11 +13,11 @@ export async function getAllComment(postId) {
 }
 
 // 2. 특정 게시물에 댓글 작성
-export async function createComment(authorId, postId, content, parentComment = null) {
+export async function createComment(authorId, postId, content, parentCommentId = null) {
   try {
     // 부모 댓글이 있는 경우 => 대댓글 작성
-    if (parentComment) {
-      const parentComment = await Comment.findById(parentComment);
+    if (parentCommentId) {
+      const parentComment = await Comment.findById(parentCommentId);
       if (!parentComment) {
         throw new Error('첫번째 댓글을 찾을 수 없습니다.');
       }
@@ -40,30 +40,36 @@ export async function createComment(authorId, postId, content, parentComment = n
 }
 
 // 3. 특정 게시물에 작성한 댓글 수정
-export async function updateComment(commentId, content) {
+export async function updateComment(authorId, commentId, content) {
   try {
-    const findComment = await Comment.findById(commentId);
-    // findComment(댓글)이 없으면 대댓글을 찾아서 수정
-    if (!findComment) {
-      const findReply = await Reply.findById(commentId);
-      if (!findReply) {
+    const foundComment = await Comment.findById(commentId);
+    // foundComment(댓글)이 없으면 대댓글을 찾아서 수정
+    if (!foundComment) {
+      const foundReply = await Reply.findById(commentId);
+      if (!foundReply) {
         throw new Error('댓글을 찾을 수 없습니다.');
       }
-      const updateReply = await Reply.findByIdAndUpdate(
+      if (foundReply.authorId !== authorId) {
+        throw new Error('댓글 수정 권한이 없습니다.');
+      }
+      const updatedReply = await Reply.findByIdAndUpdate(
         commentId,
         { $set: { content: content, updatedAt: new Date() } },
-        { new: true },
+        { new: true, runValidators: true },
       );
-      return updateReply;
+      return updatedReply;
     }
 
     // 댓글 수정
-    const updateComment = await Comment.findByIdAndUpdate(
+    if (foundComment.authorId !== authorId) {
+      throw new Error('댓글 수정 권한이 없습니다.');
+    }
+    const updatedComment = await Comment.findByIdAndUpdate(
       commentId,
       { $set: { content: content, updatedAt: new Date() } },
-      { new: true },
+      { new: true, runValidators: true },
     );
-    return updateComment;
+    return updatedComment;
   } catch (error) {
     console.error(error);
     throw new Error('댓글 수정을 실패했습니다.');
@@ -71,26 +77,25 @@ export async function updateComment(commentId, content) {
 }
 
 // 4. 특정 게시물에 작성한 댓글 삭제
-export async function deleteComment(commentId) {
+export async function deleteComment(authorId, commentId) {
   try {
-    const findComment = await Comment.findById(commentId);
-    // 댓글 삭제
-    if (findComment) {
-      await findComment.remove();
-      return { message: '댓글이 삭제되었습니다.' };
-    }
+    const deletedComment = (await Comment.findByIdAndDelete(commentId)) || (await Reply.findByIdAndDelete(commentId));
 
-    // 대댓글 삭제
-    const findReply = await Reply.findById(commentId);
-    if (findReply) {
-      await findReply.remove();
-      // 댓글스키마에서 대댓글 _id 제거
-      const parentComment = await Comment.findById(findReply.parentComment);
-      if (parentComment) {
-        parentComment.reply.pull(findReply._id);
-        await parentComment.save();
+    if (deletedComment) {
+      if (deletedComment.authorId !== authorId) {
+        throw new Error('댓글 삭제 권한이 없습니다.');
+      }
+      // 대댓글의 경우 댓글스키마에서 대댓글 _id 제거
+      if (deletedComment instanceof Reply) {
+        const parentComment = await Comment.findById(deletedComment.parentComment);
+        if (parentComment) {
+          parentComment.reply.pull(deletedComment._id);
+          await parentComment.save();
+        }
       }
       return { message: '댓글이 삭제되었습니다.' };
+    } else {
+      throw new Error('댓글을 찾을 수 없습니다.');
     }
   } catch (error) {
     console.error(error);
