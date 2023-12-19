@@ -1,10 +1,10 @@
 import * as likeService from '../services/likeService.js';
 
 // 1. 찜한 코스 전체 조회
-export async function getLikedPosts(req, res) {
+export async function getAllLikedPosts(req, res) {
   const userId = req.userId;
   try {
-    const likedPosts = await likeService.getLikedPosts(userId);
+    const likedPosts = await likeService.getAllLikedPosts(userId);
     res.status(200).json({ likedPosts });
   } catch (error) {
     console.error(error);
@@ -37,10 +37,10 @@ export async function deleteLike(req, res) {
 }
 
 // 4. 찜하기 전체 취소
-export async function deleteAllLike(req, res) {
+export async function deleteAllLikes(req, res) {
   const userId = req.userId;
   try {
-    await likeService.deleteAllLike(userId);
+    await likeService.deleteAllLikes(userId);
     res.status(204).end();
   } catch (error) {
     res.status(500).json({ error: error.message });
