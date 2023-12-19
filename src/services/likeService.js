@@ -1,10 +1,10 @@
-import Like from '../models/schemas/like.js';
+import Like from '../models/schemas/Like.js';
 import Post from '../models/schemas/post.js';
 
-// 찜한 코스 전체 조회
+// 1. 찜한 코스 전체 조회
 export async function getLikedPosts(userId) {
   try {
-    const likePostIds = (await Like.find({ userId }).distinct('postId')).map(String);
+    const likePostIds = await Like.find({ userId }).distinct('postId');
     const likePostData = await Post.find({ _id: { $in: likePostIds } }).lean();
     return likePostData;
   } catch (error) {
@@ -13,7 +13,7 @@ export async function getLikedPosts(userId) {
   }
 }
 
-// 특정 게시물에 찜하기
+// 2. 특정 게시물에 찜하기
 export async function createLike(userId, postId) {
   try {
     const createdLike = await Like.create({ userId, postId });
@@ -24,7 +24,7 @@ export async function createLike(userId, postId) {
   }
 }
 
-// 특정 게시물에 찜 취소
+// 3. 특정 게시물에 찜 취소
 export async function deleteLike(userId, postId) {
   try {
     await Like.findOneAndDelete({ userId, postId });
@@ -34,7 +34,7 @@ export async function deleteLike(userId, postId) {
   }
 }
 
-// 찜하기 전체 취소
+// 4. 찜하기 전체 취소
 export async function deleteAllLike(userId) {
   try {
     await Like.deleteMany({ userId });
