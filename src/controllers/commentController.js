@@ -1,10 +1,10 @@
 import * as commentService from '../services/commentService.js';
 
 // 1. 마이페이지에서 내가 썼던 댓글 조회
-export async function getMyComments(req, res) {
+export async function getAllCommentsByUserId(req, res) {
   try {
     const authorId = req.userId;
-    const myComments = await getMyComments(authorId);
+    const myComments = await commentService.getAllCommentsByUserId(authorId);
     res.status(200).json({ myComments });
   } catch (error) {
     console.error(error);
@@ -13,10 +13,10 @@ export async function getMyComments(req, res) {
 }
 
 // 2. 게시물에 있는 댓글 조회
-export async function getComments(req, res) {
+export async function getCommentsByPostId(req, res) {
   try {
     const postId = req.params.postId;
-    const comments = await commentService.getComments(postId);
+    const comments = await commentService.getCommentsByPostId(postId);
     res.status(200).json({ comments });
   } catch (error) {
     console.error(error);
@@ -65,7 +65,7 @@ export async function deleteComment(req, res) {
     const commentId = req.params.commentId;
 
     const deletedComment = await commentService.deleteComment(authorId, commentId);
-    res.status(200).json(deletedComment);
+    res.status(204).json(deletedComment);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });

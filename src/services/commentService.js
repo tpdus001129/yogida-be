@@ -2,7 +2,7 @@ import Comment from '../models/schemas/Comment.js';
 import Reply from '../models/schemas/Reply.js';
 
 // 1. 마이페이지에서 내가 썼던 댓글 조회
-export async function getMyComments(authorId) {
+export async function getAllCommentsByUserId(authorId) {
   try {
     const comments = await Comment.find({ authorId });
     const replies = await Reply.find({ authorId });
@@ -15,7 +15,7 @@ export async function getMyComments(authorId) {
 }
 
 // 2. 게시물에 있는 댓글 조회
-export async function getComments(postId) {
+export async function getCommentsByPostId(postId) {
   try {
     const comments = await Comment.find({ postId }).populate('reply');
     return comments;
@@ -68,11 +68,9 @@ export async function updateComment(authorId, commentId, content) {
       throw new Error('댓글 수정 권한이 없습니다.');
     }
 
-    const updatedComment = await comment.findByIdAndUpdate(
-      commentId,
-      { $set: { content, updatedAt: new Date() } },
-      { new: true, runValidators: true },
-    );
+    const updateContent = { $set: { content, updatedAt: new Date() } };
+    const options = { new: true, runValidators: true };
+    const updatedComment = await comment.updateOne(updateContent, options);
     return updatedComment;
   } catch (error) {
     console.error(error);
@@ -83,17 +81,17 @@ export async function updateComment(authorId, commentId, content) {
 // 5. 특정 게시물에 작성한 댓글 삭제
 export async function deleteComment(authorId, commentId) {
   try {
-    const foundComment = await Comment.findOneAndDelete({ authorId, commentId });
-    const foundReply = await Reply.findOneAndDelete({ authorId, commentId });
-    if (!foundComment || !foundReply) {
+    const foundComment = await Comment.deleteOne({ _id: commentId, authorId });
+    const foundReply = await Reply.deleteOne({ _id: commentId, authorId });
+    if (foundComment.deletedCount === 0 || foundReply.deletedCount === 0) {
       throw new Error('댓글을 찾을 수 없거나 삭제 권한이 없습니다.');
     }
 
     // 대댓글의 경우 댓글스키마에서 대댓글 _id 제거
-    if (foundReply) {
-      const parentComment = await Comment.findById(foundReply.parentComment);
+    if (foundReply.deletedCount !== 0) {
+      const parentComment = await Comment.findById(commentId);
       if (parentComment) {
-        parentComment.reply.pull(foundReply._id);
+        parentComment.reply.pull(commentId);
         await parentComment.save();
       }
     }
