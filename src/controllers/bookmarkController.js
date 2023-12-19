@@ -1,63 +1,56 @@
 import * as bookmarkService from '../services/bookmarkService.js';
 
-export async function getAllBookmarksById(req, res, next) {
-  try {
-    const userId = req.userId;
-    const bookmarks = await bookmarkService.getAllBookmarksById(userId);
+// 특정 사용자의 모든 즐겨찾기 조회
+export async function getAllBookmarksByUserId(req, res) {
+  // 쿠키로 저장한 사용자 아이디를 가져온다면 req.userId로
+  const userId = req.userId;
+  const bookmarks = await bookmarkService.getAllBookmarksByUserId(userId);
 
-    res.status(200).json({
-      status: 200,
-      bookmarks,
-    });
-  } catch (err) {
-    next(err);
+  if (bookmarks.length === 0) {
+    throw new Error('즐겨찾기를 찾을 수 없습니다.');
   }
+
+  return res.status(200).json({ bookmarks });
 }
 
-export async function createBookmark(req, res, next) {
-  try {
-    const { _id } = req.params;
-    const bookmarkItem = req.body;
-    const result = await bookmarkService.createBookmark(_id, bookmarkItem);
+// 특정 사용자의 즐겨찾기 추가
+export async function createBookmark(req, res) {
+  // 쿠키로 저장한 사용자 아이디를 가져온다면 req.userId로
+  const userId = req.userId;
+  // postId? singleScheduleId?
+  const singleScheduleId = req.body.singleScheduleId;
+  const result = await bookmarkService.createBookmark(userId, singleScheduleId);
 
-    if (!result) {
-      return res.status(400).json({ status: 400, message: '해당 북마크를 찾을 수 없습니다.' });
-    }
-
-    res.json(result);
-  } catch (err) {
-    next(err);
+  if (result === null) {
+    throw new Error('해당 즐겨찾기를 찾을 수 없습니다.');
   }
+
+  return res.status(200).json({ msg: '즐겨찾기 추가 성공' });
 }
 
-export async function deleteAllBookmarks(req, res, next) {
-  try {
-    const bookmarkList = req.body;
-    await bookmarkService.deleteAllBookmark(bookmarkList);
+// 특정 유저의 즐겨찾기 전체 삭제
+export async function deleteAllBookmarks(req, res) {
+  // 쿠키로 저장한 사용자 아이디를 가져온다면 req.userId로
+  const userId = req.userId;
+  const bookmarkIds = req.body;
+  const result = await bookmarkService.deleteAllBookmark(userId, bookmarkIds);
 
-    res.status(200).json({
-      status: 200,
-      message: '북마크 전체 삭제 성공',
-    });
-  } catch (err) {
-    next(err);
+  if (!result) {
+    throw new Error('전체 즐겨찾기를 찾을 수 없거나 삭제할 권한이 없습니다.');
   }
+
+  res.status(200).json({ msg: '유저의 즐겨찾기 전체 삭제 성공' });
 }
 
-export async function deleteBookmarkById(req, res, next) {
-  try {
-    const { _id } = req.params;
-    const bookmark = await bookmarkService.deleteBookmarkById(_id);
+// 특정 사용자가 선택한 즐겨찾기 삭제
+export async function deleteBookmarkById(req, res) {
+  const userId = req.userId;
+  const bookmarkIds = req.body;
+  const result = await bookmarkService.deleteBookmarkById(userId, bookmarkIds);
 
-    if (bookmark === null) {
-      return res.status(404).json({ status: 400, message: '해당 게시글이 존재하지 않습니다.' });
-    }
-
-    res.status(200).json({
-      status: 200,
-      message: '게시글 삭제 성공',
-    });
-  } catch (err) {
-    next(err);
+  if (!result) {
+    throw new Error('해당 즐겨찾기를 찾을 수 없거나 삭제할 권한이 없습니다.');
   }
+
+  res.status(200).json({ msg: '유저가 선택한 즐겨찾기 삭제 성공' });
 }
