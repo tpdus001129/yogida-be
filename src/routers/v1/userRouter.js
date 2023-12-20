@@ -8,7 +8,9 @@ const userRouter = express.Router();
 userRouter.get('/:userId', asyncHandler(userController.getUserById));
 
 // 닉네임 중복 확인
-userRouter.get('/check/:nickname', asyncHandler(userController.checkNickname));
+userRouter.post('/check/nickname', asyncHandler(userController.checkNickname));
 
-//
+// 이메일 중복 확인
+userRouter.post('/check/email', asyncHandler(userController.checkEmail));
+
 export default userRouter;
