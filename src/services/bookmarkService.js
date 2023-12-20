@@ -1,58 +1,40 @@
-import Bookmark from '../models/schemas/bookmark.js';
+import Bookmark from '../models/schemas/Bookmark.js';
 
-export async function getAllBookmarksById(userId) {
+// 특정 사용자의 모든 즐겨찾기 조회
+export async function getAllBookmarksByUserId(userId) {
   try {
-    const bookmarks = await Bookmark.find({ userId }).populate('travelPlace').exec();
-
-    if (!bookmarks) {
-      return { status: 200, message: '북마크가 없습니다.' };
-    }
-
-    return bookmarks;
+    return await Bookmark.find({ userId }).populate('travelPlace');
   } catch (err) {
-    throw new Error(err);
+    throw new Error(err.message);
   }
 }
 
-export async function createBookmark(_id, bookmarkItem) {
+// 특정 사용자의 즐겨찾기 추가
+export async function createBookmark(userId, singleScheduleId) {
   try {
-    const bookmark = await Bookmark.create({ _id }, bookmarkItem).exec();
-
-    if (!bookmark) {
-      return { status: 400, message: '추가 실패' };
-    }
-
-    return bookmark;
+    return await Bookmark.create({ userId }, ...singleScheduleId);
   } catch (err) {
-    throw new Error(err);
+    throw new Error(err.message);
   }
 }
 
-export async function deleteBookmarkById(_id) {
+// 특정 유저의 즐겨찾기 전체 삭제
+export async function deleteAllBookmarks(userId, bookmarkIds) {
+  if (!bookmarkIds) {
+    throw new Error('즐겨찾기 정보가 없습니다.');
+  }
   try {
-    const bookmark = await Bookmark.findByIdAndDelete({ _id }).exec();
-
-    if (!bookmark) {
-      return { status: 400, message: '북마크를 찾을 수 없습니다.' };
-    }
-
-    return bookmark;
+    await Bookmark.deleteMany({ _id: { $in: bookmarkIds }, userId });
   } catch (err) {
-    throw new Error(err);
+    throw new Error(err.message);
   }
 }
 
-export async function deleteAllBookmarks(bookmarkList) {
-  if (!bookmarkList) {
-    throw new Error('북마크 정보가 없습니다.');
-  }
+// 특정 사용자가 선택한 즐겨찾기 삭제
+export async function deleteBookmarkByBookmarkId(bookmarkId) {
   try {
-    await Promise.all(
-      bookmarkList.map(async (bm) => {
-        await Bookmark.deleteOne({ _id: bm }).exec();
-      }),
-    );
+    return await Bookmark.deleteOne(bookmarkId);
   } catch (err) {
-    throw new Error(err);
+    throw new Error(err.message);
   }
 }

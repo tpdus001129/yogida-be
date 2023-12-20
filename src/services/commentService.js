@@ -1,5 +1,5 @@
 import Comment from '../models/schemas/comment.js';
-import Reply from '../models/schemas/reply.js';
+import Reply from '../models/schemas/Reply.js';
 
 // 1. 게시물에 있는 댓글 조회
 export async function getAllComment(postId) {
