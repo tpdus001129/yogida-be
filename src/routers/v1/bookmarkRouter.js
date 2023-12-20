@@ -1,6 +1,7 @@
 import express from 'express';
 import * as bookmarkController from '../../controllers/bookmarkController.js';
 import asyncHandler from '../../middleware/asyncHandler.js';
+import { isAuth } from '../../middleware/isAuth.js';
 
 const bookmarkRouter = express.Router();
 
@@ -8,7 +9,7 @@ const bookmarkRouter = express.Router();
 bookmarkRouter.get('/', asyncHandler(bookmarkController.getAllBookmarksByUserId));
 
 // 북마크 추가 (req.body: {postId: "some-id"})
-bookmarkRouter.post('/', asyncHandler(bookmarkController.createBookmark));
+bookmarkRouter.post('/', isAuth, asyncHandler(bookmarkController.createBookmark));
 
 // 북마크 전체 삭제
 bookmarkRouter.delete('/', asyncHandler(bookmarkController.deleteAllBookmarks));

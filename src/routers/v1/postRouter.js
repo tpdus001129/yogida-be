@@ -1,6 +1,7 @@
 import express from 'express';
 import * as postController from '../../controllers/postController.js';
 import asyncHandler from '../../middleware/asyncHandler.js';
+import { isAuth } from '../../middleware/isAuth.js';
 
 const postRouter = express.Router();
 
@@ -11,7 +12,7 @@ postRouter.get('/', asyncHandler(postController.getAllPosts));
 postRouter.get('/:postId', asyncHandler(postController.getPostByPostId));
 
 // 게시글 생성
-postRouter.post('/', asyncHandler(postController.createPost));
+postRouter.post('/', isAuth, asyncHandler(postController.createPost));
 
 // 게시글 수정
 postRouter.put('/:postId', asyncHandler(postController.updatePost));

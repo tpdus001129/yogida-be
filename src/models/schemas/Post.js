@@ -9,6 +9,8 @@ const singleSchedule = new Schema({
   star: { type: Number, required: true },
   // 카테고리
   category: { type: String, required: true },
+  //위도경도
+  placePosition: [{ type: Number, required: true }],
 });
 
 const postSchema = new Schema(
