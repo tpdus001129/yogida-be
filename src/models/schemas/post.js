@@ -1,8 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
 const singleSchedule = new Schema({
-  // 해당 게시글의 ObjectId
-  postId: { type: Schema.Types.ObjectId, ref: 'Post', require: true },
   // 장소
   placeName: { type: String, required: true },
   // 이미지

@@ -14,6 +14,6 @@ bookmarkRouter.post('/', asyncHandler(bookmarkController.createBookmark));
 bookmarkRouter.delete('/', asyncHandler(bookmarkController.deleteAllBookmarks));
 
 // 북마크 선택 삭제
-bookmarkRouter.delete('/:id', asyncHandler(bookmarkController.deleteBookmarkById));
+bookmarkRouter.delete('/:bookmarkId', asyncHandler(bookmarkController.deleteBookmarkByBookmarkId));
 
 export default bookmarkRouter;

@@ -1,16 +1,18 @@
-export class HttpException extends Error {
-  constructor(status, message) {
-    super(message);
-    this.status = status;
-    this.message = message;
+export default class CustomError extends Error {
+  constructor(name, description, options) {
+    if (options?.cause !== undefined && options?.cause !== null) {
+      super(description, { cause: options.cause });
+    } else {
+      super(description);
+    }
+    this.name = name;
+    this.statusCode = options?.statusCode ?? 500;
   }
 }
 
-function errorHandler(err, req, res) {
-  return res.status(err.status || 500).json({
+export function errorHandler(err, req, res) {
+  return res.status(err.status ?? 500).json({
     result: 'fail',
-    error: err.message || 'Error',
+    error: err.message ?? 'Error',
   });
 }
-
-export default errorHandler;
