@@ -1,11 +1,6 @@
 import nodemailer from 'nodemailer';
-<<<<<<< HEAD
-import User from '../models/schemas/user.js';
-import Auth from '../models/schemas/Auth.js';
-=======
 import User from '../models/schemas/User.js';
-import Auth from '../models/schemas/auth.js';
->>>>>>> 1d50de02591c2a707513ce41e355759ddc08d08d
+import Auth from '../models/schemas/Auth.js';
 import { createToken } from '../utils/jwt.js';
 import config from '../config/config.js';
 import bcrypt from 'bcrypt';

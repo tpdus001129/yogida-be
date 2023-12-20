@@ -46,7 +46,7 @@ const postSchema = new Schema(
   },
 );
 
-const SingleSchedule = mongoose.model('SingleSchedule', singleSchedule);
+export const SingleSchedule = mongoose.model('SingleSchedule', singleSchedule);
 const Post = mongoose.model('Post', postSchema);
 
-export { Post, SingleSchedule };
+export default Post;

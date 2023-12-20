@@ -1,4 +1,4 @@
-import { Post } from '../models/schemas/Post.js';
+import Post from '../models/schemas/Post.js';
 
 // 모든 게시글 조회
 export async function getAllPosts() {
