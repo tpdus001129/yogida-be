@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-function isRequired(key, defaultValue = undefined) {
+function validateKey(key, defaultValue = undefined) {
   // process.env의 key값이 존재하지 않으면 defaultValue를 반환한다.
   const value = process.env[key] || defaultValue;
 
@@ -13,23 +13,23 @@ function isRequired(key, defaultValue = undefined) {
 
 const config = {
   host: {
-    port: isRequired('SERVER_PORT'),
+    port: validateKey('SERVER_PORT'),
   },
   db: {
-    host: isRequired('MONGO_HOST'),
+    host: validateKey('MONGO_HOST'),
   },
   kakao: {
     auth: {
-      restApiKey: isRequired('REST_API_KEY'),
-      redirectUri: isRequired('REDIRECT_URI'),
+      restApiKey: validateKey('REST_API_KEY'),
+      redirectUri: validateKey('REDIRECT_URI'),
     },
   },
   bcrypt: {
-    saltRounds: isRequired('SALT_ROUNDS'),
+    saltRounds: validateKey('SALT_ROUNDS'),
   },
   jwt: {
-    secretKey: isRequired('JWT_SECRET_KEY'),
-    expiresSec: isRequired('JWT_EXPIRES_SEC'),
+    secretKey: validateKey('JWT_SECRET_KEY'),
+    expiresSec: validateKey('JWT_EXPIRES_SEC'),
   },
 };
 

@@ -1,5 +1,5 @@
 import Like from '../models/schemas/Like.js';
-import Post from '../models/schemas/post.js';
+import Post from '../models/schemas/Post.js';
 
 // 1. 찜한 코스 전체 조회
 export async function getAllLikedPosts(userId) {

@@ -1,18 +1,19 @@
 import express from 'express';
-import * as bookmarkController from '../../controllers/bookmarkController';
+import * as bookmarkController from '../../controllers/bookmarkController.js';
+import asyncHandler from '../../middleware/asyncHandler.js';
 
 const bookmarkRouter = express.Router();
 
 // 전체 북마크 조회
-bookmarkRouter.get('/users/bookmarks', bookmarkController.getAllBookmarksById);
+bookmarkRouter.get('/', asyncHandler(bookmarkController.getAllBookmarksByUserId));
 
-// 북마크 추가
-bookmarkRouter.post('/users/bookmarks/:id', bookmarkController.createBookmark);
+// 북마크 추가 (req.body: {postId: "some-id"})
+bookmarkRouter.post('/', asyncHandler(bookmarkController.createBookmark));
 
 // 북마크 전체 삭제
-bookmarkRouter.delete('/users/bookmarks', bookmarkController.deleteAllBookmarks);
+bookmarkRouter.delete('/', asyncHandler(bookmarkController.deleteAllBookmarks));
 
 // 북마크 선택 삭제
-bookmarkRouter.delete('/users/bookmarks/:id', bookmarkController.deleteBookmarkById);
+bookmarkRouter.delete('/:bookmarkId', asyncHandler(bookmarkController.deleteBookmarkByBookmarkId));
 
 export default bookmarkRouter;
