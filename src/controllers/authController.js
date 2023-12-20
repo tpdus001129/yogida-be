@@ -3,6 +3,7 @@ import axios from 'axios';
 import * as authService from '../services/authService.js';
 import * as userService from '../services/userService.js';
 import CustomError from '../middleware/errorHandler.js';
+import { createToken } from '../utils/jwt.js';
 
 // 로그인 URL 넘겨주는 함수 (인가 코드 요청 함수)
 export async function kakaoLogin(req, res) {
@@ -25,7 +26,7 @@ export async function kakaoAuthRedirectHandler(req, res) {
 
   // 있다면 바로 로그인 (토큰을 쿠키에 담아 메인페이지로 리다이렉트 한다.)
   if (user) {
-    const token = await authService.login(email, null, nickname, 'kakao');
+    const token = createToken(email, nickname);
     res.cookie('token', token, {
       httpOnly: true,
     });
@@ -44,9 +45,14 @@ export async function kakaoAuthRedirectHandler(req, res) {
 // 회원가입
 export async function signup(req, res) {
   const { email, password, nickname, type } = req.body;
+  const accessToken = req.cookies.accessToken;
+  const userInfo = await getKakaoUserInfo(accessToken);
+
+  console.log(userInfo);
+
   let token;
   if (type === 'kakao') {
-    token = await authService.snsSignup(email, nickname);
+    token = await authService.snsSignup(userInfo.id, email, nickname);
   } else {
     token = await authService.signup(email, password, nickname);
   }
