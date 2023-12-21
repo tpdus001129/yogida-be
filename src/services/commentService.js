@@ -26,19 +26,19 @@ export async function getCommentsByPostId(postId) {
 }
 
 // 3. 특정 게시물에 댓글 작성
-export async function createComment(authorId, postId, content, parentCommentId = null) {
+export async function createComment(authorId, postId, content, parentComment) {
   try {
     // 부모 댓글이 있는 경우 => 대댓글 작성
-    if (parentCommentId) {
-      const parentComment = await Comment.findById(parentCommentId);
-      if (!parentComment) {
+    if (parentComment) {
+      const parentCommentId = await Comment.findById(parentComment);
+      if (!parentCommentId) {
         throw new Error('첫번째 댓글을 찾을 수 없습니다.');
       }
-      const newReply = new Reply({ parentComment, authorId, content });
+      const newReply = new Reply({ parentComment: parentCommentId, authorId, postId, content });
       const reply = await newReply.save();
 
-      parentComment.reply.push(reply._id);
-      await parentComment.save();
+      parentCommentId.reply.push(reply._id);
+      await parentCommentId.save();
       return reply;
     }
 
@@ -53,9 +53,9 @@ export async function createComment(authorId, postId, content, parentCommentId =
 }
 
 // 4. 특정 게시물에 작성한 댓글 수정
-export async function updateComment(authorId, commentId, content) {
+export async function updateComment(commentId, postId, authorId, content) {
   try {
-    const foundComment = await Comment.findById(commentId);
+    const foundComment = await Reply.findById(commentId);
     const foundReply = await Reply.findById(commentId);
     if (!foundComment || !foundReply) {
       throw new Error('댓글을 찾을 수 없습니다.');
@@ -68,7 +68,7 @@ export async function updateComment(authorId, commentId, content) {
       throw new Error('댓글 수정 권한이 없습니다.');
     }
 
-    const updateContent = { $set: { content, updatedAt: new Date() } };
+    const updateContent = { $set: { postId, authorId, content, updatedAt: new Date() } };
     const options = { new: true, runValidators: true };
     const updatedComment = await comment.updateOne(updateContent, options);
     return updatedComment;

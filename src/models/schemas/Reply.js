@@ -6,7 +6,10 @@ const replySchema = new Schema(
     parentComment: {
       type: Schema.Types.ObjectId,
       ref: 'Comment',
+      required: true,
     },
+    // 해당 게시글의 ObjectId
+    postId: { type: Schema.Types.ObjectId, ref: 'Post', required: true },
     // 작성자의 ObjectId
     authorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     // 대댓글의 내용
