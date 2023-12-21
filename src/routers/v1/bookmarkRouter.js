@@ -9,7 +9,8 @@ const bookmarkRouter = express.Router();
 bookmarkRouter.get('/', asyncHandler(bookmarkController.getAllBookmarksByUserId));
 
 // 북마크 추가 (req.body: {postId: "some-id"})
-bookmarkRouter.post('/', isAuth, asyncHandler(bookmarkController.createBookmark));
+// isAuth 추가하기
+bookmarkRouter.post('/', asyncHandler(bookmarkController.createBookmark));
 
 // 북마크 전체 삭제
 bookmarkRouter.delete('/', asyncHandler(bookmarkController.deleteAllBookmarks));

@@ -87,7 +87,7 @@ export async function updatePost(req, res) {
     });
   }
 
-  return res.status(201).json({ message: '게시글이 수정되었습니다.' });
+  return res.status(200).json({ message: '게시글이 수정되었습니다.' });
 }
 
 // 특정 사용자의 게시글 삭제
@@ -99,7 +99,6 @@ export async function deletePost(req, res) {
   if (!deletedPost) {
     throw new CustomError(commonError.POST_DELETE_ERROR, '게시글 삭제를 실패하였습니다.', {
       statusCode: 404,
-      cause: error,
     });
   }
 

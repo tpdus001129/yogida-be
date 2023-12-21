@@ -1,13 +1,15 @@
 import mongoose, { Schema } from 'mongoose';
 
 const bookmarkSchema = new Schema({
-  userId: {
+  authorId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
+    required: true,
   },
-  travelPlace: {
+  singleScheduleId: {
     type: Schema.Types.ObjectId,
     ref: 'SingleSchedule',
+    required: true,
   },
 });
 
