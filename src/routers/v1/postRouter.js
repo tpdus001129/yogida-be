@@ -11,6 +11,9 @@ postRouter.get('/', asyncHandler(postController.getAllPosts));
 // 게시글 세부 일정 조회 (상세페이지)
 postRouter.get('/:postId', asyncHandler(postController.getPostByPostId));
 
+// 특정 사용자의 전체 게시글 조회
+postRouter.get('/:userId', asyncHandler(postController.getAllPostsByUserId));
+
 // 게시글 생성
 // isAuth 추가하기
 postRouter.post('/', asyncHandler(postController.createPost));

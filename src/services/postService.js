@@ -22,6 +22,17 @@ export async function getPostByPostId(postId) {
   });
 }
 
+//특정 사용자의 게시글 조회
+export async function getAllPostsByUserId(userId) {
+  console.log(userId);
+  return await Post.find({ authorId: userId }).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
+}
+
 // 게시글 추가
 export async function createPost(
   userId,
