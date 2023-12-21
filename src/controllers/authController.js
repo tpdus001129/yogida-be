@@ -45,13 +45,11 @@ export async function kakaoAuthRedirectHandler(req, res) {
 // 회원가입
 export async function signup(req, res) {
   const { email, password, nickname, type } = req.body;
-  const accessToken = req.cookies.accessToken;
-  const userInfo = await getKakaoUserInfo(accessToken);
-
-  console.log(userInfo);
 
   let token;
   if (type === 'kakao') {
+    const accessToken = req.cookies.accessToken;
+    const userInfo = await getKakaoUserInfo(accessToken);
     token = await authService.snsSignup(userInfo.id, email, nickname);
   } else {
     token = await authService.signup(email, password, nickname);
