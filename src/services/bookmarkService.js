@@ -29,7 +29,6 @@ export async function deleteAllBookmarks(userId, bookmarkIds) {
   if (!bookmarkIds) {
     throw new CustomError(commonError.BOOKMARK_UNKNOWN_ERROR, '즐겨찾기를 찾을 수 없습니다.', {
       statusCode: 404,
-      cause: error,
     });
   }
 
@@ -48,7 +47,6 @@ export async function deleteBookmarkByBookmarkId(bookmarkId) {
   if (bookmark.userId !== userId) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '즐겨찾기를 삭제할 권한이 없습니다.', {
       statusCode: 403,
-      cause: error,
     });
   }
 

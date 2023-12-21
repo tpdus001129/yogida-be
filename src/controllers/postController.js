@@ -2,14 +2,15 @@ import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 import * as postService from '../services/postService.js';
 
+const userId = '658147ffc84ca272c761ec03';
+
 // 모든 게시글 조회
 export async function getAllPosts(req, res) {
   const posts = await postService.getAllPosts();
 
-  if (!posts) {
-    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '전체 게시글을 찾을 수 없습니다.', {
+  if (posts.length === 0) {
+    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '게시글을 찾을 수 없습니다.', {
       statusCode: 200,
-      cause: error,
     });
   }
 
@@ -21,19 +22,18 @@ export async function getPostByPostId(req, res) {
   const postId = req.params.postId;
   const post = await postService.getPostByPostId(postId);
 
-  if (!post) {
+  if (post === null) {
     throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
-      statusCode: 200,
-      cause: error,
+      statusCode: 404,
     });
   }
 
-  return res.status(200).json({ message: '해당 게시글이 조회되었습니다.' });
+  return res.status(200).json({ data: post });
 }
 
 // 게시글 추가
 export async function createPost(req, res) {
-  const userId = req.userId;
+  // const userId = req.userId;
   const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
     req.body;
 
@@ -54,7 +54,6 @@ export async function createPost(req, res) {
   if (!result) {
     throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
       statusCode: 404,
-      cause: error,
     });
   }
 
@@ -63,7 +62,7 @@ export async function createPost(req, res) {
 
 // 특정 사용자의 게시글 수정
 export async function updatePost(req, res) {
-  const userId = req.userId;
+  // const userId = req.userId;
   const postId = req.params.postId;
   const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
     req.body;
@@ -85,7 +84,6 @@ export async function updatePost(req, res) {
   if (!result) {
     throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
       statusCode: 404,
-      cause: error,
     });
   }
 
@@ -94,16 +92,16 @@ export async function updatePost(req, res) {
 
 // 특정 사용자의 게시글 삭제
 export async function deletePost(req, res) {
-  const userId = req.userId;
+  // const userId = req.userId;
   const postId = req.params.postId;
-  const post = await postService.deletePost(userId, postId);
+  const deletedPost = await postService.deletePost(userId, postId);
 
-  if (!post) {
-    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
+  if (!deletedPost) {
+    throw new CustomError(commonError.POST_DELETE_ERROR, '게시글 삭제를 실패하였습니다.', {
       statusCode: 404,
       cause: error,
     });
   }
 
-  res.status(204).json({ message: '게시글 삭제 성공' });
+  return res.status(200).json({ message: '게시글이 삭제되었습니다.' });
 }
