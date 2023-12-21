@@ -8,12 +8,6 @@ const userId = '658147ffc84ca272c761ec03';
 export async function getAllPosts(req, res) {
   const posts = await postService.getAllPosts();
 
-  if (posts.length === 0) {
-    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '게시글을 찾을 수 없습니다.', {
-      statusCode: 200,
-    });
-  }
-
   return res.status(200).json({ posts });
 }
 
