@@ -16,7 +16,7 @@ router.get('/:postId', asyncHandler(commentController.getCommentsByPostId));
 router.post('/', asyncHandler(commentController.createComment));
 
 // 특정 게시물에 작성한 댓글 수정
-router.put('/:commentId', asyncHandler(commentController.updateComment));
+router.patch('/:commentId', asyncHandler(commentController.updateComment));
 
 // 특정 게시물에 작성한 댓글 삭제
 router.delete('/:commentId', asyncHandler(commentController.deleteComment));

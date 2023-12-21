@@ -13,10 +13,12 @@ export async function getAllCommentsByUserId(req, res) {
 
 // 2. 게시물에 있는 댓글 조회
 export async function getCommentsByPostId(req, res) {
+  console.log('파람', req.params);
+  console.log('쿼리', req.query);
   const postId = req.params.postId;
-  const comments = await commentService.getCommentsByPostId(postId);
+  const postComments = await commentService.getCommentsByPostId(postId);
 
-  res.status(200).json({ comments });
+  res.status(200).json({ postComments });
 }
 
 // 3. 특정 게시물에 댓글 작성
@@ -40,9 +42,11 @@ export async function updateComment(req, res) {
   // const authorId = req.userId;
   const authorId = '658147ffc84ca272c761ec03';
   const commentId = req.params.commentId;
-  const { postId, content } = req.body;
+  const content = req.body;
 
-  const updatedComment = await commentService.updateComment(commentId, postId, authorId, content);
+  const updatedComment = await commentService.updateComment(commentId, authorId, content);
+  console.log(updatedComment);
+
   if (!updatedComment) {
     throw new CustomError(commonError.COMMENT_UNKNOWN_ERROR, '해당 댓글을 찾을 수 없습니다.', {
       statusCode: 404,
