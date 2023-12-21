@@ -12,6 +12,7 @@ postRouter.get('/', asyncHandler(postController.getAllPosts));
 postRouter.get('/:postId', asyncHandler(postController.getPostByPostId));
 
 // 게시글 생성
+// isAuth 추가하기
 postRouter.post('/', asyncHandler(postController.createPost));
 
 // 게시글 수정
