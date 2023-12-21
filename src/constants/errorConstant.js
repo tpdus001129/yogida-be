@@ -7,6 +7,10 @@ const commonError = Object.seal({
   SCHEDULE_MATCH_ERROR: 'Schedule Match Error',
   USER_MATCH_ERROR: 'User Match Error',
   BOOKMARK_UNKNOWN_ERROR: 'Bookmark Unknown Error',
+
+  COMMENT_UNKNOWN_ERROR: 'Comment Unknown Error',
+  COMMENT_MODIFY_ERROR: 'Comment Modify Error',
+  COMMENT_DELETE_ERROR: 'Comment Delete Error',
 });
 
 export default commonError;
