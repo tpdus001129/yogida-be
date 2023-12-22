@@ -27,6 +27,8 @@ const commonError = Object.seal({
   LIKE_CONFLICT: 'Like Conflict',
 
   VALIDATION_ERROR: 'Validation Error',
+
+  AUTHENTICATION_ERROR: 'Authentication Error',
 });
 
 export default commonError;
