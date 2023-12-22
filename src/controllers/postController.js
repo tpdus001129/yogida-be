@@ -25,6 +25,20 @@ export async function getPostByPostId(req, res) {
   return res.status(200).json({ data: post });
 }
 
+// 특정 사용자의 게시글 조회
+export async function getAllPostsByUserId(req, res) {
+  const posts = await postService.getAllPostsByUserId(userId);
+  console.log('3', userId);
+
+  if (posts === null) {
+    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
+  return res.status(200).json({ data: posts });
+}
+
 // 게시글 추가
 export async function createPost(req, res) {
   // const userId = req.userId;
