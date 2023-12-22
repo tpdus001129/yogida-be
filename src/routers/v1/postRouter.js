@@ -16,6 +16,9 @@ postRouter.get('/my-page', asyncHandler(postController.getAllPostsByUserId));
 // 테그 필터링 된 게시글 조회
 postRouter.get('/filter', asyncHandler(postController.getAllPostsByTags));
 
+// 검색된 여행지로 게시글 조회
+postRouter.get('/search', asyncHandler(postController.getAllPostsByDestination));
+
 // 게시글 세부 일정 조회 (상세페이지)
 postRouter.get('/:postId', asyncHandler(postController.getPostByPostId));
 
