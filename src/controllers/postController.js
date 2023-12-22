@@ -46,6 +46,27 @@ export async function getAllPostsByTags(req, res) {
   return res.status(200).json({ posts });
 }
 
+// 최신순으로 게시글 조회
+export async function getPostsByLatest(req, res) {
+  const posts = await postService.getPostsByLatest();
+
+  return res.status(200).json({ posts });
+}
+
+// 오래된 순으로 게시글 조회
+export async function getPostsByOldest(req, res) {
+  const posts = await postService.getPostsByOldest();
+
+  return res.status(200).json({ posts });
+}
+
+// 찜 많은 순으로 게시글 조회
+export async function getPostsByMostLike(req, res) {
+  const posts = await postService.getPostsByMostLike();
+
+  return res.status(200).json({ posts });
+}
+
 // 검색된 여행지로 게시글 조회
 export async function getAllPostsByDestination(req, res) {
   const city = req.query.city;

@@ -63,6 +63,42 @@ export async function getAllPostsByTags(tags) {
   });
 }
 
+// 최신순으로 게시글 조회
+export async function getPostsByLatest() {
+  return await Post.find({})
+    .sort({ updatedAt: -1 })
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+}
+
+// 오래된 순으로 게시글 조회
+export async function getPostsByOldest() {
+  return await Post.find({})
+    .sort({ updatedAt: 1 })
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+}
+
+// 찜 많은 순으로 게시글 조회
+export async function getPostsByMostLike() {
+  return await Post.find({})
+    .sort({ updatedAt: -1 })
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+}
+
 // 검색된 여행지로 게시글 조회
 export async function getAllPostsByDestination(city) {
   return await Post.find({ destination: city }).catch((error) => {
