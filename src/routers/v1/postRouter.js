@@ -11,7 +11,7 @@ const postRouter = express.Router();
 postRouter.get('/', asyncHandler(postController.getAllPosts));
 
 // 특정 사용자의 전체 게시글 조회
-postRouter.get('/my-page', asyncHandler(postController.getAllPostsByUserId));
+postRouter.get('/my-page', isAuth, asyncHandler(postController.getAllPostsByUserId));
 
 // 테그 필터링 된 게시글 조회
 postRouter.get('/filter', asyncHandler(postController.getAllPostsByTags));

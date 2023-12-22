@@ -4,54 +4,55 @@ import * as postService from '../services/postService.js';
 
 // 모든 게시글 조회
 export async function getAllPosts(req, res) {
-  const result = await postService.getAllPosts();
+  const posts = await postService.getAllPosts();
 
-  return res.status(200).json({ result });
+  return res.status(200).json({ posts });
 }
 
 // 특정 게시글 조회
 export async function getPostByPostId(req, res) {
   const postId = req.params.postId;
-  const result = await postService.getPostByPostId(postId);
+  const post = await postService.getPostByPostId(postId);
 
-  if (result === null) {
+  if (post === null) {
     throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
       statusCode: 404,
     });
   }
 
-  return res.status(200).json({ result });
+  return res.status(200).json(post);
 }
 
 // 특정 사용자의 게시글 조회
 export async function getAllPostsByUserId(req, res) {
-  const result = await postService.getAllPostsByUserId(userId);
+  const userId = req.userId;
+  const posts = await postService.getAllPostsByUserId(userId);
 
-  if (result === null) {
+  if (posts === null) {
     throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
       statusCode: 200,
     });
   }
 
-  return res.status(200).json({ result });
+  return res.status(200).json({ posts });
 }
 
 // 태그로 필터링된 게시글 조회
 export async function getAllPostsByTags(req, res) {
   const tags = req.query.tag.split(',');
 
-  const result = await postService.getAllPostsByTags(tags);
+  const posts = await postService.getAllPostsByTags(tags);
 
-  return res.status(200).json({ result });
+  return res.status(200).json({ posts });
 }
 
 // 검색된 여행지로 게시글 조회
 export async function getAllPostsByDestination(req, res) {
   const city = req.query.city;
 
-  const result = await postService.getAllPostsByDestination(city);
+  const posts = await postService.getAllPostsByDestination(city);
 
-  return res.status(200).json({ result });
+  return res.status(200).json({ posts });
 }
 
 // 게시글 추가
