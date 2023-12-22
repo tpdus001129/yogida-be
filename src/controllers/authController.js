@@ -55,6 +55,10 @@ export async function signup(req, res) {
     token = await authService.signup(email, password, nickname);
   }
 
+  // 여기서 auth에 email로 찾아서 삭제한다.
+
+  await authService.deleteAuthCode(email);
+
   res.cookie('token', token, {
     httpOnly: true,
   });
@@ -62,7 +66,7 @@ export async function signup(req, res) {
 }
 
 // 유저에게 인증메일 보내기
-export async function authEmail(req, res) {
+export async function sendAuthEmail(req, res) {
   await authService.sendAuthenticationEmail(req.body.email);
   return res.status(200).json({ message: '전송 완료' });
 }

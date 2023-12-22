@@ -20,7 +20,7 @@ authRouter.get('/kakao/me', asyncHandler(authController.kakaoMe));
 authRouter.post('/signup', validator(signup), asyncHandler(authController.signup));
 
 // 인증 메일 보내기
-authRouter.post('/signup/auth-mail', validator(authMail), asyncHandler(authController.authEmail));
+authRouter.post('/signup/auth-mail', validator(authMail), asyncHandler(authController.sendAuthEmail));
 
 // 인증 번호 확인
 authRouter.post('/signup/check-mail', validator(checkMail), asyncHandler(authController.checkEmailCode));

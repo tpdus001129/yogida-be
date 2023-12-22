@@ -22,9 +22,9 @@ export const signup = Joi.object({
           statusCode: 400,
           cause: err,
         }),
-    )
-    .required(),
+    ),
   nickname: Joi.string().required(),
+  type: Joi.string(),
 });
 
 export const authMail = Joi.object({
@@ -51,7 +51,7 @@ export const checkMail = Joi.object({
         }),
     )
     .required(),
-  authCode: Joi.string().min(11).required(),
+  authCode: Joi.string().min(10).required(),
 });
 
 export const login = Joi.object({
