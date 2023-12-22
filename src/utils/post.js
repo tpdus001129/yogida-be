@@ -20,7 +20,7 @@ const tagList = [
 ];
 
 // 여기다에서 제공되는 여행 목록
-const cityList = [
+export const cityList = [
   '국내',
   '가평·양평',
   '강릉·속초',

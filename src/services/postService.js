@@ -8,7 +8,7 @@ import {
   checkCityListIncludedCity,
   checkScheduleLengthAndDay,
   checkSchedulePlaceAndDistances,
-} from '../utils/pos.js';
+} from '../utils/post.js';
 
 // 모든 게시글 조회
 export async function getAllPosts() {
@@ -65,10 +65,6 @@ export async function getAllPostsByTags(tags) {
 
 // 검색된 여행지로 게시글 조회
 export async function getAllPostsByDestination(city) {
-  // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
-  await checkCityListIncludedCity(city);
-
-  // 전체 게시글에서 해당 여행지가 있는 게시글만 반환
   return await Post.find({ destination: city }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
