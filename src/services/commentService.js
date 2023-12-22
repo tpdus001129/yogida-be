@@ -18,7 +18,9 @@ export async function getAllCommentsByUserId(userId) {
     });
   });
 
-  return [...comments, ...replies];
+  const myComments = [...comments, ...replies];
+  myComments.sort((a, b) => a.createdAt - b.createdAt);
+  return myComments;
 }
 
 // 2. 게시물에 있는 댓글 조회
