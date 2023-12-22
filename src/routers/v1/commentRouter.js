@@ -1,6 +1,8 @@
 import express from 'express';
 import * as commentController from '../../controllers/commentController.js';
 import asyncHandler from '../../middleware/asyncHandler.js';
+import validator from '../../middleware/validator.js';
+import { createComment, updateComment } from '../../middleware/validators/comment.js';
 // import { isAuth } from '../../middleware/isAuth.js';
 const router = express.Router();
 
@@ -13,10 +15,10 @@ router.get('/', asyncHandler(commentController.getAllCommentsByUserId));
 router.get('/:postId', asyncHandler(commentController.getCommentsByPostId));
 
 // 특정 게시물에 댓글 작성
-router.post('/', asyncHandler(commentController.createComment));
+router.post('/', validator(createComment), asyncHandler(commentController.createComment));
 
 // 특정 게시물에 작성한 댓글 수정
-router.patch('/:commentId', asyncHandler(commentController.updateComment));
+router.patch('/:commentId', validator(updateComment), asyncHandler(commentController.updateComment));
 
 // 특정 게시물에 작성한 댓글 삭제
 router.delete('/:commentId', asyncHandler(commentController.deleteComment));
