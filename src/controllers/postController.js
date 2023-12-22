@@ -70,7 +70,7 @@ export async function createPost(req, res) {
 
 // 특정 사용자의 게시글 수정
 export async function updatePost(req, res) {
-  // const userId = req.userId;
+  const userId = req.userId;
   const postId = req.params.postId;
   const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
     req.body;
