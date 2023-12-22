@@ -2,8 +2,6 @@ import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 import * as postService from '../services/postService.js';
 
-const userId = '658147ffc84ca272c761ec03';
-
 // 모든 게시글 조회
 export async function getAllPosts(req, res) {
   const posts = await postService.getAllPosts();
@@ -28,20 +26,28 @@ export async function getPostByPostId(req, res) {
 // 특정 사용자의 게시글 조회
 export async function getAllPostsByUserId(req, res) {
   const posts = await postService.getAllPostsByUserId(userId);
-  console.log('3', userId);
 
   if (posts === null) {
     throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
-      statusCode: 404,
+      statusCode: 200,
     });
   }
 
   return res.status(200).json({ data: posts });
 }
 
+// 태그로 필터링된 게시글 조회
+export async function getAllPostsByTags(req, res) {
+  const tags = req.query.tag.split(',');
+
+  const posts = await postService.getAllPostsByTags(tags);
+
+  return res.status(200).json({ data: posts });
+}
+
 // 게시글 추가
 export async function createPost(req, res) {
-  // const userId = req.userId;
+  const userId = req.userId;
   const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
     req.body;
 
@@ -100,7 +106,7 @@ export async function updatePost(req, res) {
 
 // 특정 사용자의 게시글 삭제
 export async function deletePost(req, res) {
-  // const userId = req.userId;
+  const userId = req.userId;
   const postId = req.params.postId;
   const deletedPost = await postService.deletePost(userId, postId);
 

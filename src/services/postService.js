@@ -2,6 +2,27 @@ import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 import Post from '../models/schemas/Post.js';
 
+// 여기다에서 제공되는 태그 목록
+const tagList = [
+  '체험·엠티비티',
+  'SNS 핫플레이스',
+  '자연적인',
+  '유명 관광지',
+  '힐링',
+  '문화·예술·역사',
+  '맛집 탐방',
+  '혼자',
+  '친구와',
+  '연인과',
+  '아이와',
+  '부모님과',
+  '반려견과',
+  '기타',
+];
+
+// 여기다에서 제공되는 여행 목록
+const cityList = [];
+
 // 모든 게시글 조회
 export async function getAllPosts() {
   return await Post.find({}).catch((error) => {
@@ -26,8 +47,38 @@ export async function getPostByPostId(postId) {
 
 //특정 사용자의 게시글 조회
 export async function getAllPostsByUserId(userId) {
-  console.log(userId);
   return await Post.find({ authorId: userId }).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
+}
+
+// 받아온 태그 배열, 검색 값이 기존에 제공된 것인지 확인
+async function checkListIncludedItem(items, checkList) {
+  for (const item of items) {
+    if (!checkList.includes(item)) {
+      throw new CustomError(commonError.TAG_UNKNOWN_ERROR, '태그를 찾을 수 없습니다.', {
+        statusCode: 404,
+      });
+    }
+  }
+}
+
+// 태그 필터링된 게시글 조회
+export async function getAllPostsByTags(tags) {
+  if (!Array.isArray(tags)) {
+    throw new CustomError(commonError.POST_TYPE_ERROR, '올바른 요청 값이 아닙니다.', {
+      statusCode: 404,
+    });
+  }
+
+  // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
+  await checkListIncludedItem(tags, tagList);
+
+  // 전체 게시글에서 해당 태그가 있는 게시글만 반환
+  return Post.find({ tag: { $in: tags } }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
       cause: error,
@@ -104,7 +155,7 @@ export async function updatePost(
     });
   }
 
-  if (!post.authorId.equals(userId)) {
+  if (post.authorId.equals(userId)) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '게시글을 수정할 권한이 없습니다.', {
       statusCode: 403,
     });
@@ -149,7 +200,7 @@ export async function deletePost(userId, postId) {
   }
 
   // 작성자와 삭제하려는 사용자가 일치한지
-  if (post.authorId.toString() !== userId) {
+  if (post.authorId.equals(userId)) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '게시글을 삭제할 권한이 없습니다.', {
       statusCode: 403,
     });

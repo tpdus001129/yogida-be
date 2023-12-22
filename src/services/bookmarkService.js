@@ -40,7 +40,7 @@ export async function deleteAllBookmarks(userId, bookmarkIds) {
   }
 
   if (!Array.isArray(bookmarkIds)) {
-    throw new CustomError(commonError.BOOKMARK_UNKNOWN_ERROR, '올바른 요청 값이 아닙니다.', {
+    throw new CustomError(commonError.BOOKMARK_TYPE_ERROR, '올바른 요청 값이 아닙니다.', {
       statusCode: 404,
     });
   }
@@ -55,7 +55,7 @@ export async function deleteAllBookmarks(userId, bookmarkIds) {
 
   let deletedCount = 0;
 
-  // 저장한 사용자와 삭제할 사용자가 일치한지 확인
+  // 저장한 사용자와 삭제할 사용자가 일치한지 확인 -> 삭제
   for (const bookmark of bookmarks) {
     if (bookmark.authorId.equals(userId)) {
       await bookmark.deleteOne({ _id: bookmark._id }).catch((error) => {
@@ -86,7 +86,7 @@ export async function deleteBookmarkByBookmarkId(userId, bookmarkId) {
     });
   }
 
-  if (bookmark.authorId.toString() !== userId) {
+  if (bookmark.authorId.equals(userId)) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '북마크를 삭제할 권한이 없습니다.', {
       statusCode: 403,
     });
