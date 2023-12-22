@@ -21,7 +21,22 @@ const tagList = [
 ];
 
 // 여기다에서 제공되는 여행 목록
-const cityList = [];
+const cityList = [
+  '국내',
+  '가평·양평',
+  '강릉·속초',
+  '서울',
+  '경주',
+  '부산',
+  '여수',
+  '인천',
+  '전주',
+  '제주',
+  '춘천·홍천',
+  '태안',
+  '통영·거제·남해',
+  '포항·안동',
+];
 
 // 모든 게시글 조회
 export async function getAllPosts() {
@@ -55,17 +70,6 @@ export async function getAllPostsByUserId(userId) {
   });
 }
 
-// 받아온 태그 배열, 검색 값이 기존에 제공된 것인지 확인
-async function checkListIncludedItem(items, checkList) {
-  for (const item of items) {
-    if (!checkList.includes(item)) {
-      throw new CustomError(commonError.TAG_UNKNOWN_ERROR, '태그를 찾을 수 없습니다.', {
-        statusCode: 404,
-      });
-    }
-  }
-}
-
 // 태그 필터링된 게시글 조회
 export async function getAllPostsByTags(tags) {
   if (!Array.isArray(tags)) {
@@ -75,10 +79,34 @@ export async function getAllPostsByTags(tags) {
   }
 
   // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-  await checkListIncludedItem(tags, tagList);
+  for (const tag of tags) {
+    if (!tagList.includes(tag)) {
+      throw new CustomError(commonError.TAG_UNKNOWN_ERROR, '태그를 찾을 수 없습니다.', {
+        statusCode: 404,
+      });
+    }
+  }
 
   // 전체 게시글에서 해당 태그가 있는 게시글만 반환
   return Post.find({ tag: { $in: tags } }).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
+}
+
+// 검색된 여행지로 게시글 조회
+export async function getAllPostsByDestination(city) {
+  // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
+  if (!cityList.includes(city)) {
+    throw new CustomError(commonError.TAG_UNKNOWN_ERROR, '검색어를 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
+  // 전체 게시글에서 해당 여행지가 있는 게시글만 반환
+  return await Post.find({ destination: city }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
       cause: error,
