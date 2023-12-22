@@ -16,6 +16,8 @@ const commonError = Object.seal({
   LIKE_UNKNOWN_ERROR: 'Like Unknown Error',
   LIKE_DELETE_ERROR: 'Like Delete Error',
   LIKE_CONFLICT: 'Like Conflict',
+
+  VALIDATION_ERROR: 'Validation Error',
 });
 
 export default commonError;

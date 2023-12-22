@@ -165,7 +165,6 @@ export async function sendAuthenticationEmail(email) {
 
   await sendMessage();
 
-  console.log('[isOver]', isOver);
   // 유효기한이 넘으면 아래가 실행됨.
   if (isOver) {
     await Auth.updateOne({ email }, { authCode, expiredTime }); // 유효시간을 업데이트
