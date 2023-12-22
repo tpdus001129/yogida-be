@@ -38,7 +38,7 @@ export async function kakaoAuthRedirectHandler(req, res) {
     });
     console.log('엑세스 토큰은 ? - ', data.access_token);
     // 추가 정보 받는 페이지로 리다이렉트~
-    return res.status(302).redirect(`http://localhost:5173/signup`);
+    return res.status(302).redirect(`http://localhost:5173/setup`);
   }
 }
 
