@@ -35,12 +35,14 @@ export async function getAllPosts() {
 
 // 특정 게시글 조회
 export async function getPostByPostId(postId) {
-  return await Post.findOne({ _id: postId }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
+  return await Post.findOne({ _id: postId })
+    .populate({ path: 'authorId', select: '_id nickname' })
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
     });
-  });
 }
 
 //특정 사용자의 게시글 조회
@@ -153,7 +155,7 @@ export async function updatePost(
     });
   }
 
-  if (!post.authorId.equals(userId)) {
+  if (post.authorId.equals(userId)) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '게시글을 수정할 권한이 없습니다.', {
       statusCode: 403,
     });
@@ -198,7 +200,7 @@ export async function deletePost(userId, postId) {
   }
 
   // 작성자와 삭제하려는 사용자가 일치한지
-  if (post.authorId.toString() !== userId) {
+  if (post.authorId.equals(userId)) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '게시글을 삭제할 권한이 없습니다.', {
       statusCode: 403,
     });

@@ -86,7 +86,7 @@ export async function deleteBookmarkByBookmarkId(userId, bookmarkId) {
     });
   }
 
-  if (bookmark.authorId.toString() !== userId) {
+  if (bookmark.authorId.equals(userId)) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '북마크를 삭제할 권한이 없습니다.', {
       statusCode: 403,
     });
