@@ -12,6 +12,10 @@ const commonError = Object.seal({
   COMMENT_UNKNOWN_ERROR: 'Comment Unknown Error',
   COMMENT_MODIFY_ERROR: 'Comment Modify Error',
   COMMENT_DELETE_ERROR: 'Comment Delete Error',
+
+  LIKE_UNKNOWN_ERROR: 'Like Unknown Error',
+  LIKE_DELETE_ERROR: 'Like Delete Error',
+  LIKE_CONFLICT: 'Like Conflict',
 });
 
 export default commonError;
