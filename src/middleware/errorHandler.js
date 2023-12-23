@@ -1,3 +1,5 @@
+import commonError from '../constants/errorConstant.js';
+
 export default class CustomError extends Error {
   constructor(name, description, options) {
     if (options?.cause !== undefined && options?.cause !== null) {
@@ -10,9 +12,16 @@ export default class CustomError extends Error {
   }
 }
 
-export function errorHandler(err, req, res) {
+// eslint-disable-next-line
+export function errorHandler(err, req, res, next) {
+  console.error(err);
+  if (err.cause) {
+    // cause 가 있을때만 출력
+    console.error(err.cause);
+  }
+
   return res.status(err.statusCode ?? 500).json({
-    result: 'fail',
-    error: err.message ?? 'Error',
+    name: err.name ?? commonError.UNKNOWN_ERROR,
+    message: err.message ?? '알 수 없는 에러 입니다.',
   });
 }
