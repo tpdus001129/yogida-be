@@ -61,11 +61,11 @@ export async function getPostsByOldest(req, res) {
 }
 
 // 찜 많은 순으로 게시글 조회
-export async function getPostsByMostLike(req, res) {
-  const posts = await postService.getPostsByMostLike();
+// export async function getPostsByMostLike(req, res) {
+//   const posts = await postService.getPostsByMostLike();
 
-  return res.status(200).json({ posts });
-}
+//   return res.status(200).json({ posts });
+// }
 
 // 검색된 여행지로 게시글 조회
 export async function getAllPostsByDestination(req, res) {
@@ -79,8 +79,20 @@ export async function getAllPostsByDestination(req, res) {
 // 게시글 추가
 export async function createPost(req, res) {
   const userId = req.userId;
-  const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
-    req.body;
+  const {
+    title,
+    destination,
+    startDate,
+    endDate,
+    tag,
+    schedules,
+    distances,
+    cost,
+    peopleCount,
+    // likeCount,
+    isPublic,
+    reviewText,
+  } = req.body;
 
   const result = await postService.createPost(userId, {
     title,
@@ -92,6 +104,7 @@ export async function createPost(req, res) {
     distances,
     cost,
     peopleCount,
+    // likeCount,
     isPublic,
     reviewText,
   });

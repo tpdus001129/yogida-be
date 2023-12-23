@@ -23,7 +23,7 @@ postRouter.get('/latest', asyncHandler(postController.getPostsByLatest));
 postRouter.get('/oldest', asyncHandler(postController.getPostsByOldest));
 
 // 찜 많은 순으로 게시글 조회
-postRouter.get('/most-like', asyncHandler(postController.getPostsByMostLike));
+// postRouter.get('/most-like', asyncHandler(postController.getPostsByMostLike));
 
 // 검색된 여행지로 게시글 조회
 postRouter.get('/search', asyncHandler(postController.getAllPostsByDestination));
