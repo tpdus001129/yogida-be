@@ -1,16 +1,16 @@
 import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
-import Alram from '../models/schemas/AlarmSchema.js';
+import Alarm from '../models/schemas/AlarmSchema.js';
 import Post from '../models/schemas/Post.js';
 
-// reciverId 로 검색
-export async function getAlramByAlramId(alramId) {
-  return await Alram.findOne({ _id: alramId }).lean();
+// receiverId 로 검색
+export async function getAlarmByAlarmId(alarmId) {
+  return await Alarm.findOne({ _id: alarmId }).lean();
 }
 
 // 특정 유저의 모든 알람 보기.
-export async function getAllAlrams(userId) {
-  return await Alram.find({ reciverId: userId })
+export async function getAllAlarms(userId) {
+  return await Alarm.find({ receiverId: userId })
     .populate({ path: 'senderId', select: '-_id nickname' })
     .catch((err) => {
       throw new CustomError(commonError.DB_ERROR, '알람을 불러오는 중 오류가 생겼습니다.', {
@@ -21,34 +21,34 @@ export async function getAllAlrams(userId) {
 }
 
 // 특정 알람 삭제하기
-export async function deleteAlram(userId, alramId) {
+export async function deleteAlarm(userId, alarmId) {
   // 알람이 자신의 알람인지 확인
-  const foundAlram = await getAlramByAlramId(alramId);
+  const foundAlarm = await getAlarmByAlarmId(alarmId);
 
-  if (!foundAlram) {
+  if (!foundAlarm) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '알람이 존재 하지 않습니다.');
   }
 
-  if (!foundAlram.reciverId.equals(userId)) {
+  if (!foundAlarm.receiverId.equals(userId)) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '자신의 알람이 아닙니다.');
   }
 
-  return await Alram.deleteOne({ reciverId: userId }).catch((err) => {
+  return await Alarm.deleteOne({ receiverId: userId }).catch((err) => {
     throw new CustomError(commonError.DB_ERROR, '삭제 도중 오류가 생겼습니다.', { statusCode: 400, cause: err });
   });
 }
 
 // 모든 알람 삭제하기
 export async function deleteAllAlarams(userId) {
-  return await Alram.deleteMany({ reciverId: userId }).catch((err) => {
+  return await Alarm.deleteMany({ receiverId: userId }).catch((err) => {
     throw new CustomError(commonError.DB_ERROR, '삭제 도중 오류가 생겼습니다.', { statusCode: 400, cause: err });
   });
 }
 
 // 특정 알람 읽음 처리 하기
-export async function readAlram(alramId) {
-  return await Alram.findOneAndUpdate({ _id: alramId }, { isRead: true }, { runValidators: true })
-    .populate({ path: 'reciverId', select: '-_id nickname' })
+export async function readAlarm(alarmId) {
+  return await Alarm.findOneAndUpdate({ _id: alarmId }, { isRead: true }, { runValidators: true })
+    .populate({ path: 'receiverId', select: '-_id nickname' })
     .populate({ path: 'senderId', select: '-_id nickname' })
     .catch((err) => {
       throw new CustomError(commonError.DB_ERROR, '업데이트 도중 오류가 생겼습니다.', { statusCode: 400, cause: err });
@@ -56,19 +56,19 @@ export async function readAlram(alramId) {
 }
 
 // 알람 생성하기
-export async function createAlram(postId, senderId, alramType) {
+export async function createAlarm(postId, senderId, alarmType) {
   // 포스트의 author를 찾아서 revicer 로 설정
-  const reciverId = await Post.findOne({ _id: postId }, { authorId: 1 });
-  console.log(reciverId);
+  const receiverId = await Post.findOne({ _id: postId }, { authorId: 1 });
+  console.log(receiverId);
 
-  const alram = new Alram({
-    reciverId,
+  const alarm = new Alarm({
+    receiverId,
     senderId,
-    alramType,
+    alarmType,
     isRead: false,
   });
 
-  return await Alram.create(alram).catch((err) => {
+  return await Alarm.create(alarm).catch((err) => {
     throw new CustomError(commonError.DB_ERROR, '알람을 생성하는 도중 오류가 생겼습니다.', {
       statusCode: 400,
       cause: err,

@@ -1,7 +1,7 @@
 import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 import * as commentService from '../services/commentService.js';
-import { createAlram } from '../services/alramService.js';
+import { createAlarm } from '../services/alarmService.js';
 
 // 1. 마이페이지에서 내가 썼던 댓글 조회
 export async function getAllCommentsByUserId(req, res) {
@@ -43,7 +43,7 @@ export async function createComment(req, res) {
     newComment = await commentService.createComment(userId, postId, content); // 댓글
   }
 
-  await createAlram(postId, userId, 'comment'); // 알림 생성
+  await createAlarm(postId, userId, 'comment'); // 알림 생성
   res.status(201).json(newComment);
 }
 
