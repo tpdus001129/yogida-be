@@ -10,7 +10,7 @@ import commonError from '../constants/errorConstant.js';
 const MAX_EXPIRY_MINUTE = 5;
 
 // 소셜 로그인 회원 가입 하기
-export async function snsSignup(snsId, email, nickname) {
+export async function snsSignup(snsId, email, nickname, profileImageUrl) {
   // 이미 가입된 이메일 있는지 검사
   const hasEmail = await User.findOne({ email });
 
@@ -24,6 +24,7 @@ export async function snsSignup(snsId, email, nickname) {
     snsId,
     email,
     nickname,
+    profileImageUrl,
     provider: 'kakao',
   }).catch((err) => {
     throw new CustomError(commonError.DB_ERROR, '유저를 생성 하는 도중 문제가 생겼습니다.', {

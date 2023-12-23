@@ -3,6 +3,7 @@ import CustomError from '../errorHandler.js';
 import commonError from '../../constants/errorConstant.js';
 
 export const signup = Joi.object({
+  snsId: Joi.string(),
   email: Joi.string()
     .email()
     .error(
@@ -24,6 +25,7 @@ export const signup = Joi.object({
         }),
     ),
   nickname: Joi.string().required(),
+  profileImageUrl: Joi.string(),
   type: Joi.string(),
 });
 
