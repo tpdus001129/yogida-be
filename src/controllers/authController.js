@@ -4,6 +4,7 @@ import * as authService from '../services/authService.js';
 import * as userService from '../services/userService.js';
 import CustomError from '../middleware/errorHandler.js';
 import { createToken } from '../utils/jwt.js';
+import commonError from '../constants/errorConstant.js';
 
 // 로그인 URL 넘겨주는 함수 (인가 코드 요청 함수)
 export async function kakaoLogin(req, res) {
@@ -133,6 +134,37 @@ export async function kakaoMe(req, res) {
   return res.status(200).json({ snsId, email, nickname, profileImageUrl });
 }
 
+// 카카오 연결 끊기
+export async function kakaoUnlink(req, res) {
+  const snsId = req.user.snsId;
+  const bodyData = {
+    target_id_type: 'user_id',
+    target_id: snsId,
+  };
+  const result = await axios
+    .post('https://kapi.kakao.com/v1/user/unlink', bodyData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+        Authorization: `KakaoAK ${config.kakao.auth.appAdminKey}`,
+      },
+    })
+    .catch((err) => {
+      throw new CustomError(commonError.KAKAO_API_ERROR, '탈퇴하는데 알수 없는 에러가 생겼습니다.', {
+        statusCode: 500,
+        cause: err,
+      });
+    });
+  return res.status(200).json({ message: '연결 해제 성공', snsId: result.data.id });
+}
+
+export async function withdraw(req, res) {
+  const userId = req.userId;
+
+  await userService.deleteUser(userId);
+
+  return res.status(200).json({ message: '탈퇴 성공' });
+}
+
 // 엑세스 토큰 받아오는 함수
 async function getAccessToken(code) {
   const bodyData = {
@@ -146,7 +178,12 @@ async function getAccessToken(code) {
     'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
   };
 
-  const response = await axios.post(`https://kauth.kakao.com/oauth/token`, bodyData, { headers });
+  const response = await axios.post(`https://kauth.kakao.com/oauth/token`, bodyData, { headers }).catch((err) => {
+    throw new CustomError(commonError.KAKAO_API_ERROR, '토큰을 발급 받는 중 알 수 없는 에러가 생겼습니다.', {
+      statusCode: 500,
+      cause: err,
+    });
+  });
   return response.data;
 }
 
@@ -156,6 +193,11 @@ async function getKakaoUserInfo(accessToken) {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
+  }).catch((err) => {
+    throw new CustomError(commonError.KAKAO_API_ERROR, '사용자 정보를 요청 하는 중 알 수 없는 에러가 생겼습니다.', {
+      statusCode: 500,
+      cause: err,
+    });
   });
 
   return info.data;
@@ -177,8 +219,10 @@ async function isValidAccessToken(accessToken) {
     })
     .catch((err) => {
       if (err.response.status === 401) {
-        console.error(err.message);
-        throw new CustomError('Token Error', '토큰이 유효하지 않습니다.', { statusCode: 401 });
+        throw new CustomError(commonError.KAKAO_API_ERROR, '토큰이 유효하지 않습니다.', {
+          statusCode: 401,
+          cause: err,
+        });
       }
     });
 }

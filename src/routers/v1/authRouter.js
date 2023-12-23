@@ -37,4 +37,10 @@ authRouter.post('/logout', isAuth, asyncHandler(authController.logout));
 // 로그인 상태 체크
 authRouter.get('/me', isAuth, asyncHandler(authController.me));
 
+// 카카오 탈퇴
+authRouter.post('/kakao/unlink', isAuth, asyncHandler(authController.kakaoUnlink));
+
+// 이메일 탈퇴
+authRouter.delete('/withdraw', isAuth, asyncHandler(authController.withdraw));
+
 export default authRouter;
