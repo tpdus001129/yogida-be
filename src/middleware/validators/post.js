@@ -22,7 +22,7 @@ export const post = Joi.object({
   distances: Joi.array().items(Joi.array().items(Joi.number().required()).required()).required(),
   cost: Joi.number().required(),
   peopleCount: Joi.number().required(),
-  // likeCount: Joi.number().required(),
+  likeCount: Joi.number().required(),
   isPublic: Joi.boolean().required(),
   reviewText: Joi.string().required(),
 });
