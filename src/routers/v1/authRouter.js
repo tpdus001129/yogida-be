@@ -32,7 +32,7 @@ authRouter.post('/login', validator(login), asyncHandler(authController.login));
 authRouter.post('/change-password', isAuth, validator(changePassword), asyncHandler(authController.changePassword));
 
 // 로그인 아웃
-// authRouter.post('/logout', authController.logout);
+authRouter.post('/logout', isAuth, asyncHandler(authController.logout));
 
 // 로그인 상태 체크
 authRouter.get('/me', isAuth, asyncHandler(authController.me));

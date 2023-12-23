@@ -104,6 +104,12 @@ export async function changePassword(req, res) {
   return res.status(200).json({ message: '변경 완료' });
 }
 
+// 로그아웃
+export async function logout(req, res) {
+  res.clearCookie('token');
+  return res.status(200).json({ message: '로그아웃 성공' });
+}
+
 // 로그인 상태 체크
 export async function me(req, res) {
   console.log(req.user);
