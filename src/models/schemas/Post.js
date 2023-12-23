@@ -37,7 +37,7 @@ const postSchema = new Schema(
     peopleCount: { type: Number, required: true },
     // 찜 갯수
     // likeCount: { type: Schema.Types.ObjectId, ref: 'Like', default: 0, required: true },
-    likeCount: { type: Number, default: 0, required: true },
+    // likeCount: { type: Number, default: 0, required: true },
     // 게시글 공개 or 비공개 유무
     isPublic: {
       type: Boolean,
