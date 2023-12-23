@@ -121,9 +121,10 @@ export async function kakaoMe(req, res) {
   }
 
   const userInfo = await getKakaoUserInfo(accessToken);
+  const snsId = userInfo.id.toString();
   const { email } = userInfo.kakao_account;
   const { nickname, profile_image_url: profileImageUrl } = userInfo.kakao_account.profile;
-  return res.status(200).json({ snsId: userInfo.id, email, nickname, profileImageUrl });
+  return res.status(200).json({ snsId, email, nickname, profileImageUrl });
 }
 
 // 엑세스 토큰 받아오는 함수
