@@ -63,6 +63,42 @@ export async function getAllPostsByTags(tags) {
   });
 }
 
+// 최신순으로 게시글 조회
+export async function getPostsByLatest() {
+  return await Post.find({})
+    .sort({ updatedAt: -1 })
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+}
+
+// 오래된 순으로 게시글 조회
+export async function getPostsByOldest() {
+  return await Post.find({})
+    .sort({ updatedAt: 1 })
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+}
+
+// 찜 많은 순으로 게시글 조회
+export async function getPostsByMostLike() {
+  return await Post.find({})
+    .sort({ likeCount: -1 })
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+}
+
 // 검색된 여행지로 게시글 조회
 export async function getAllPostsByDestination(city) {
   return await Post.find({ destination: city }).catch((error) => {
@@ -76,12 +112,25 @@ export async function getAllPostsByDestination(city) {
 // 게시글 추가
 export async function createPost(
   userId,
-  { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
+  {
+    title,
+    destination,
+    startDate,
+    endDate,
+    tag,
+    schedules,
+    distances,
+    cost,
+    peopleCount,
+    likeCount,
+    isPublic,
+    reviewText,
+  },
 ) {
-  // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
+  // 사용자가 선택한 태그들이 기존에 제공된 태그인지 검사
   await checkTagListIncludedTag(tag);
 
-  // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
+  // 사용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
   await checkCityListIncludedCity(destination);
 
   // 여행일정과 디데일 일치한지 검사
@@ -101,6 +150,7 @@ export async function createPost(
     distances,
     cost,
     peopleCount,
+    likeCount,
     isPublic,
     reviewText,
   }).catch((error) => {
@@ -115,7 +165,20 @@ export async function createPost(
 export async function updatePost(
   userId,
   postId,
-  { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
+  {
+    title,
+    destination,
+    startDate,
+    endDate,
+    tag,
+    schedules,
+    distances,
+    cost,
+    peopleCount,
+    likeCount,
+    isPublic,
+    reviewText,
+  },
 ) {
   const post = await Post.findOne({ _id: postId }).lean();
 
@@ -149,6 +212,7 @@ export async function updatePost(
       distances,
       cost,
       peopleCount,
+      likeCount,
       isPublic,
       reviewText,
     },
