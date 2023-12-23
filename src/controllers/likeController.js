@@ -1,7 +1,7 @@
 import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 import * as likeService from '../services/likeService.js';
-import { createAlram } from '../services/alramService.js';
+import { createAlarm } from '../services/alarmService.js';
 
 // 1. 찜한 코스 전체 조회
 export async function getAllLikedPosts(req, res) {
@@ -29,7 +29,7 @@ export async function createLike(req, res) {
     });
   }
 
-  await createAlram(postId, userId, 'like'); // 알림 생성
+  await createAlarm(postId, userId, 'like'); // 알림 생성
   res.status(201).json(like);
 }
 

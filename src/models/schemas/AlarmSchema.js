@@ -1,12 +1,12 @@
 import mongoose, { Schema } from 'mongoose';
 
-const alramSchema = new Schema(
+const alarmSchema = new Schema(
   {
     postId: {
       type: Schema.Types.ObjectId,
       ref: 'Post',
     },
-    reciverId: {
+    receiverId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
@@ -14,7 +14,7 @@ const alramSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
-    alramType: { type: String, enum: ['like', 'comment'] },
+    alarmType: { type: String, enum: ['like', 'comment'] },
     isRead: {
       type: Boolean,
       default: false,
@@ -23,5 +23,5 @@ const alramSchema = new Schema(
   { timestamps: true },
 );
 
-const Alram = mongoose.model('Alram', alramSchema);
-export default Alram;
+const Alarm = mongoose.model('Alarm', alarmSchema);
+export default Alarm;
