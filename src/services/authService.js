@@ -24,7 +24,7 @@ export async function snsSignup(snsId, email, nickname, profileImageUrl) {
     snsId,
     email,
     nickname,
-    profileImageUrl,
+    profileImageSrc: profileImageUrl,
     provider: 'kakao',
   }).catch((err) => {
     throw new CustomError(commonError.DB_ERROR, '유저를 생성 하는 도중 문제가 생겼습니다.', {
