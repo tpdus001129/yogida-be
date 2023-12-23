@@ -21,6 +21,7 @@ const config = {
   kakao: {
     auth: {
       restApiKey: validateKey('REST_API_KEY'),
+      appAdminKey: validateKey('APP_ADMIN_KEY'),
       redirectUri: validateKey('REDIRECT_URI'),
     },
   },

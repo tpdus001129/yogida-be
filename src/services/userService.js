@@ -1,3 +1,5 @@
+import commonError from '../constants/errorConstant.js';
+import CustomError from '../middleware/errorHandler.js';
 import User from '../models/schemas/User.js';
 
 export async function getAllUsers() {
@@ -8,7 +10,7 @@ export async function getUserById(id) {
   try {
     return await User.findOne({ _id: id }, { password: false }).lean();
   } catch (err) {
-    throw new Error(err);
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', { statusCode: 500, cause: err });
   }
 }
 
@@ -16,7 +18,7 @@ export async function getUserBySnsId(snsId) {
   try {
     return await User.findOne({ snsId }, { password: false }).lean();
   } catch (err) {
-    throw new Error(err);
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', { statusCode: 500, cause: err });
   }
 }
 
@@ -32,16 +34,14 @@ export async function getUserByClientId(clientId) {
   try {
     return await User.findOne({ _id: clientId }, { password: false }).lean();
   } catch (err) {
-    throw new Error(err);
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', { statusCode: 500, cause: err });
   }
 }
 
 export async function deleteUser(_id) {
   try {
-    await User.deleteOne({ _id });
-
-    return { status: 200, message: '탈퇴 성공' };
+    return await User.deleteOne({ _id });
   } catch (err) {
-    throw new Error(err);
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', { statusCode: 500, cause: err });
   }
 }
