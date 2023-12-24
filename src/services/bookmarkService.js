@@ -5,7 +5,6 @@ import Post from '../models/schemas/Post.js';
 
 // 특정 사용자의 모든 북마크 조회
 export async function getAllBookmarksByUserId(userId) {
-  console.log(userId);
   return await Bookmark.find({ authorId: userId }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,

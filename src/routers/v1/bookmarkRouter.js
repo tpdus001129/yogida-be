@@ -12,6 +12,6 @@ bookmarkRouter.get('/', isAuth, asyncHandler(bookmarkController.getAllBookmarksB
 bookmarkRouter.post('/', isAuth, asyncHandler(bookmarkController.createBookmark));
 
 // 북마크 삭제
-bookmarkRouter.delete('/', isAuth, asyncHandler(bookmarkController.deleteAllBookmarks));
+bookmarkRouter.patch('/', isAuth, asyncHandler(bookmarkController.deleteAllBookmarks));
 
 export default bookmarkRouter;
