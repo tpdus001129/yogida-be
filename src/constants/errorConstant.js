@@ -9,6 +9,7 @@ const commonError = Object.seal({
   POST_DELETE_ERROR: 'Post Delete Error',
 
   TAG_UNKNOWN_ERROR: 'Tag Unknown Error',
+  TAG_COUNT_ERROR: 'Tag Count Error',
   SEARCHED_CITY_UNKNOWN_ERROR: 'Searched City Unknown Error',
 
   SCHEDULE_MATCH_ERROR: 'Schedule Match Error',
@@ -16,6 +17,7 @@ const commonError = Object.seal({
 
   BOOKMARK_UNKNOWN_ERROR: 'Bookmark Unknown Error',
   BOOKMARK_TYPE_ERROR: 'Bookmark Type Error',
+  BOOKMARK_CREATE_ERROR: 'Bookmark Create Error',
   BOOKMARK_DELETE_ERROR: 'Bookmark Delete Error',
 
   COMMENT_UNKNOWN_ERROR: 'Comment Unknown Error',

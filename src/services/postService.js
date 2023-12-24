@@ -51,6 +51,12 @@ export async function getAllPostsByTags(tags) {
     });
   }
 
+  if (tags.length > 5) {
+    throw new CustomError(commonError.TAG_COUNT_ERROR, '태그는 최대 5개까지 선택 가능합니다.', {
+      statusCode: 404,
+    });
+  }
+
   // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
   await checkTagListIncludedTag(tags);
 
@@ -112,20 +118,7 @@ export async function getAllPostsByDestination(city) {
 // 게시글 추가
 export async function createPost(
   userId,
-  {
-    title,
-    destination,
-    startDate,
-    endDate,
-    tag,
-    schedules,
-    distances,
-    cost,
-    peopleCount,
-    likeCount,
-    isPublic,
-    reviewText,
-  },
+  { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
 ) {
   // 사용자가 선택한 태그들이 기존에 제공된 태그인지 검사
   await checkTagListIncludedTag(tag);
@@ -139,6 +132,7 @@ export async function createPost(
   // 세부 장소와 거리 수가 일치한지 검사
   await checkSchedulePlaceAndDistances(schedules, distances);
 
+  // 이 부분에서 likeCount를 0으로 설정하여 추가합니다.
   return await Post.create({
     authorId: userId,
     title,
@@ -150,9 +144,9 @@ export async function createPost(
     distances,
     cost,
     peopleCount,
-    likeCount,
     isPublic,
     reviewText,
+    likeCount: 0,
   }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
@@ -165,20 +159,7 @@ export async function createPost(
 export async function updatePost(
   userId,
   postId,
-  {
-    title,
-    destination,
-    startDate,
-    endDate,
-    tag,
-    schedules,
-    distances,
-    cost,
-    peopleCount,
-    likeCount,
-    isPublic,
-    reviewText,
-  },
+  { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
 ) {
   const post = await Post.findOne({ _id: postId }).lean();
 
