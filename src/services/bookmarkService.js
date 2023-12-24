@@ -5,6 +5,7 @@ import Post from '../models/schemas/Post.js';
 
 // 특정 사용자의 모든 북마크 조회
 export async function getAllBookmarksByUserId(userId) {
+  console.log(userId);
   return await Bookmark.find({ authorId: userId }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
@@ -23,6 +24,14 @@ export async function getSingleScheduleIdByPostId(postId, singleScheduleId) {
 
 // 특정 사용자의 북마크 추가
 export async function createBookmark(userId, singleScheduleId) {
+  const findBookmark = await Bookmark.findOne({ authorId: userId, singleScheduleId: singleScheduleId });
+
+  if (findBookmark) {
+    throw new CustomError(commonError.BOOKMARK_CREATE_ERROR, '이미 북마크에 추가되어있습니다.', {
+      statusCode: 500,
+    });
+  }
+
   return await Bookmark.create({ authorId: userId, singleScheduleId }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
@@ -31,7 +40,7 @@ export async function createBookmark(userId, singleScheduleId) {
   });
 }
 
-// 특정 유저의 북마크 전체 삭제
+// 특정 유저의 북마크 삭제
 export async function deleteAllBookmarks(userId, bookmarkIds) {
   if (!bookmarkIds || bookmarkIds.length === 0) {
     throw new CustomError(commonError.BOOKMARK_UNKNOWN_ERROR, '북마크를 찾을 수 없습니다.', {
@@ -74,28 +83,4 @@ export async function deleteAllBookmarks(userId, bookmarkIds) {
   }
 
   return deletedCount;
-}
-
-// 특정 사용자가 선택한 북마크 삭제
-export async function deleteBookmarkByBookmarkId(userId, bookmarkId) {
-  const bookmark = await Bookmark.findOne({ _id: bookmarkId }).lean();
-
-  if (!bookmark) {
-    throw new CustomError(commonError.POST_NOT_FOUND, '게시글을 찾을 수 없습니다.', {
-      statusCode: 404,
-    });
-  }
-
-  if (bookmark.authorId.equals(userId)) {
-    throw new CustomError(commonError.USER_MATCH_ERROR, '북마크를 삭제할 권한이 없습니다.', {
-      statusCode: 403,
-    });
-  }
-
-  return await Bookmark.deleteOne({ _id: bookmarkId }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
-    });
-  });
 }

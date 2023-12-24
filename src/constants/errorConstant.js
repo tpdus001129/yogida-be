@@ -17,6 +17,7 @@ const commonError = Object.seal({
 
   BOOKMARK_UNKNOWN_ERROR: 'Bookmark Unknown Error',
   BOOKMARK_TYPE_ERROR: 'Bookmark Type Error',
+  BOOKMARK_CREATE_ERROR: 'Bookmark Create Error',
   BOOKMARK_DELETE_ERROR: 'Bookmark Delete Error',
 
   COMMENT_UNKNOWN_ERROR: 'Comment Unknown Error',
