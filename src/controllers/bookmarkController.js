@@ -5,10 +5,7 @@ import * as bookmarkService from '../services/bookmarkService.js';
 // 특정 사용자의 모든 북마크 조회
 export async function getAllBookmarksByUserId(req, res) {
   const userId = req.userId;
-  console.log(userId);
   const bookmarks = await bookmarkService.getAllBookmarksByUserId(userId);
-
-  console.log(bookmarks);
 
   return res.status(200).json({ bookmarks });
 }
@@ -16,7 +13,6 @@ export async function getAllBookmarksByUserId(req, res) {
 // 특정 사용자의 북마크 추가
 export async function createBookmark(req, res) {
   const userId = req.userId;
-  console.log(userId);
   const singleScheduleId = req.body.singleScheduleId;
   const postId = req.body.postId;
 
