@@ -26,22 +26,24 @@ export async function createLike(userId, postId) {
   return createdLike;
 }
 
-// 3. 특정 게시물에 찜 취소
-export async function deleteLike(userId, postId) {
-  const like = await Like.deleteOne({ userId, postId });
-  if (!like) {
-    throw new CustomError(commonError.LIKE_DELETE_ERROR, '찜 취소를 실패했습니다.', {
+// 3. 찜 삭제
+export async function deleteAllLikes(userId, bodyData) {
+  const user = Array.isArray(bodyData) ? bodyData.map((item) => item.userId) : [bodyData.userId];
+  const post = Array.isArray(bodyData) ? bodyData.map((item) => item.postId) : [bodyData.postId];
+
+  if (!user || post === 0) {
+    throw new CustomError(commonError.LIKE_UNKNOWN_ERROR, '찜을 찾을 수 없습니다.', {
       statusCode: 404,
     });
   }
-}
 
-// 4. 찜하기 전체 취소
-export async function deleteAllLikes(userId) {
-  const likes = await Like.deleteMany({ userId });
-  if (!likes) {
-    throw new CustomError(commonError.LIKE_DELETE_ERROR, '찜 전체 취소를 실패했습니다.', {
-      statusCode: 404,
+  if (!user.includes(userId.toString())) {
+    throw new CustomError(commonError.LIKE_UNKNOWN_ERROR, '찜을 삭제할 권한이 없습니다.', {
+      statusCode: 403,
     });
+  }
+
+  for (let i = 0; i < user.length; i++) {
+    await Like.deleteMany({ userId: user[i], postId: post[i] });
   }
 }
