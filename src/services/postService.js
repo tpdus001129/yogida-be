@@ -51,6 +51,12 @@ export async function getAllPostsByTags(tags) {
     });
   }
 
+  if (tags.length > 5) {
+    throw new CustomError(commonError.TAG_COUNT_ERROR, '태그는 최대 5개까지 선택 가능합니다.', {
+      statusCode: 404,
+    });
+  }
+
   // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
   await checkTagListIncludedTag(tags);
 
