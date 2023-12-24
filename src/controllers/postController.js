@@ -46,6 +46,27 @@ export async function getAllPostsByTags(req, res) {
   return res.status(200).json({ posts });
 }
 
+// 최신순으로 게시글 조회
+export async function getPostsByLatest(req, res) {
+  const posts = await postService.getPostsByLatest();
+
+  return res.status(200).json({ posts });
+}
+
+// 오래된 순으로 게시글 조회
+export async function getPostsByOldest(req, res) {
+  const posts = await postService.getPostsByOldest();
+
+  return res.status(200).json({ posts });
+}
+
+// 찜 많은 순으로 게시글 조회
+export async function getPostsByMostLike(req, res) {
+  const posts = await postService.getPostsByMostLike();
+
+  return res.status(200).json({ posts });
+}
+
 // 검색된 여행지로 게시글 조회
 export async function getAllPostsByDestination(req, res) {
   const city = req.query.city;
@@ -58,8 +79,20 @@ export async function getAllPostsByDestination(req, res) {
 // 게시글 추가
 export async function createPost(req, res) {
   const userId = req.userId;
-  const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
-    req.body;
+  const {
+    title,
+    destination,
+    startDate,
+    endDate,
+    tag,
+    schedules,
+    distances,
+    cost,
+    peopleCount,
+    likeCount,
+    isPublic,
+    reviewText,
+  } = req.body;
 
   const result = await postService.createPost(userId, {
     title,
@@ -71,6 +104,7 @@ export async function createPost(req, res) {
     distances,
     cost,
     peopleCount,
+    likeCount,
     isPublic,
     reviewText,
   });
@@ -88,8 +122,20 @@ export async function createPost(req, res) {
 export async function updatePost(req, res) {
   const userId = req.userId;
   const postId = req.params.postId;
-  const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
-    req.body;
+  const {
+    title,
+    destination,
+    startDate,
+    endDate,
+    tag,
+    schedules,
+    distances,
+    cost,
+    peopleCount,
+    likeCount,
+    isPublic,
+    reviewText,
+  } = req.body;
 
   const result = await postService.updatePost(userId, postId, {
     title,
@@ -101,6 +147,7 @@ export async function updatePost(req, res) {
     distances,
     cost,
     peopleCount,
+    likeCount,
     isPublic,
     reviewText,
   });

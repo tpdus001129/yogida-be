@@ -28,6 +28,10 @@ const commonError = Object.seal({
   LIKE_CONFLICT: 'Like Conflict',
 
   VALIDATION_ERROR: 'Validation Error',
+
+  AUTHENTICATION_ERROR: 'Authentication Error',
+
+  KAKAO_API_ERROR: 'Kakao API Error',
 });
 
 export default commonError;

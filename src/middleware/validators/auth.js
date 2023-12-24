@@ -3,6 +3,7 @@ import CustomError from '../errorHandler.js';
 import commonError from '../../constants/errorConstant.js';
 
 export const signup = Joi.object({
+  snsId: Joi.string(),
   email: Joi.string()
     .email()
     .error(
@@ -22,9 +23,10 @@ export const signup = Joi.object({
           statusCode: 400,
           cause: err,
         }),
-    )
-    .required(),
+    ),
   nickname: Joi.string().required(),
+  profileImageUrl: Joi.string(),
+  type: Joi.string(),
 });
 
 export const authMail = Joi.object({
@@ -51,7 +53,7 @@ export const checkMail = Joi.object({
         }),
     )
     .required(),
-  authCode: Joi.string().min(11).required(),
+  authCode: Joi.string().min(10).required(),
 });
 
 export const login = Joi.object({

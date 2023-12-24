@@ -39,7 +39,7 @@ export const cityList = [
 
 // 사용자 권한 확인
 export async function checkUserId(post, userId) {
-  if (post.authorId.equals(userId)) {
+  if (!post.authorId.equals(userId)) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '게시글을 수정할 권한이 없습니다.', {
       statusCode: 403,
     });

@@ -5,30 +5,36 @@ import { createToken } from '../utils/jwt.js';
 import config from '../config/config.js';
 import bcrypt from 'bcrypt';
 import CustomError from '../middleware/errorHandler.js';
+import commonError from '../constants/errorConstant.js';
 
 const MAX_EXPIRY_MINUTE = 5;
 
 // 소셜 로그인 회원 가입 하기
-export async function snsSignup(snsId, email, nickname) {
+export async function snsSignup(snsId, email, nickname, profileImageUrl) {
   // 이미 가입된 이메일 있는지 검사
   const hasEmail = await User.findOne({ email });
 
   if (hasEmail) {
-    throw new Error('이미 등록되어 있는 이메일입니다.');
-  }
-
-  try {
-    const result = await User.create({
-      snsId,
-      email,
-      nickname,
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, '이미 가입된 이메일 입니다.', {
+      statusCode: 500,
     });
-
-    const token = createToken(result.email, result.nickname);
-    return token;
-  } catch (err) {
-    throw new Error(err);
   }
+
+  const result = await User.create({
+    snsId,
+    email,
+    nickname,
+    profileImageSrc: profileImageUrl,
+    provider: 'kakao',
+  }).catch((err) => {
+    throw new CustomError(commonError.DB_ERROR, '유저를 생성 하는 도중 문제가 생겼습니다.', {
+      statusCode: 500,
+      cause: err,
+    });
+  });
+
+  const token = createToken(result.email, result.nickname);
+  return token;
 }
 
 // 회원 가입 하기
@@ -37,37 +43,52 @@ export async function signup(email, password, nickname) {
   const hasEmail = await User.findOne({ email });
 
   if (hasEmail) {
-    throw new CustomError('[signup error]', '이미 등록되어 있는 이메일입니다.', { statusCode: 409 });
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, '이미 등록되어 있는 이메일입니다.', { statusCode: 409 });
   }
 
-  try {
-    const hashedPassword = await bcrypt.hash(password, parseInt(config.bcrypt.saltRounds));
-
-    const result = await User.create({
-      email,
-      password: hashedPassword,
-      nickname,
+  const hashedPassword = await bcrypt.hash(password, parseInt(config.bcrypt.saltRounds)).catch((err) => {
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, '비밀번호를 암호화 하는데 문제가 생겼습니다.', {
+      statusCode: 500,
+      cause: err,
     });
+  });
 
-    const token = createToken(result.email, result.nickname);
-    return token;
-  } catch (err) {
-    throw new Error(err);
-  }
+  const result = await User.create({
+    email,
+    password: hashedPassword,
+    nickname,
+    provider: 'email',
+  }).catch((err) => {
+    throw new CustomError(commonError.DB_ERROR, '유저를 생성 하는 도중 문제가 생겼습니다.', {
+      statusCode: 500,
+      cause: err,
+    });
+  });
+
+  const token = createToken(result.email, result.nickname);
+  return token;
 }
 
 // 로그인 하기
 export async function login(email, password) {
-  const user = await User.findOne({ email }).exec();
+  const user = await User.findOne({ email }).lean();
+
+  if (user.provider === 'kakao') {
+    throw new CustomError(
+      commonError.AUTHENTICATION_ERROR,
+      '카카오 계정으로 가입된 이메일 입니다. \n카카오 로그인을 이용하세요',
+      { statusCode: 400 },
+    );
+  }
 
   if (!user) {
-    throw new CustomError('login error', '이메일과 비밀번호를 확인해 주세요.', { statusCode: 400 });
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, '이메일과 비밀번호를 확인해 주세요.', { statusCode: 400 });
   }
 
   const isValidPassword = await bcrypt.compare(password, user.password);
 
   if (!isValidPassword) {
-    throw new CustomError('login error', '이메일과 비밀번호를 확인해 주세요.', { statusCode: 400 });
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, '이메일과 비밀번호를 확인해 주세요.', { statusCode: 400 });
   }
 
   const token = createToken(user.email, user.nickname);
@@ -93,7 +114,7 @@ export async function changePassword(email, password) {
 // 인증 번호 이메일 전송하기
 export async function sendAuthenticationEmail(email) {
   if (email === '') {
-    throw new CustomError('Authentication Error', `이메일을 입력해주세요.`, { statusCode: 400 });
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, `이메일을 입력해주세요.`, { statusCode: 400 });
   }
   let isOver = false;
 
@@ -102,7 +123,7 @@ export async function sendAuthenticationEmail(email) {
 
   //이미 DB에 이메일이 있다면
   if (isEmailSaved) {
-    throw new CustomError('Authentication Error', '이미 등록되어 있는 이메일입니다.', { statusCode: 400 });
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, '이미 등록되어 있는 이메일입니다.', { statusCode: 400 });
   }
 
   //이미 인증db에 정보가 있는지 확인
@@ -114,7 +135,7 @@ export async function sendAuthenticationEmail(email) {
     if (new Date().getTime() < authInfo.expiredTime.getTime()) {
       isOver = false;
       throw new CustomError(
-        'Authentication Error',
+        commonError.AUTHENTICATION_ERROR,
         `이미 인증번호가 발송되었습니다. ${MAX_EXPIRY_MINUTE}분 뒤에 다시 요청해주세요.`,
         { statusCode: 400 },
       );
@@ -178,16 +199,23 @@ export async function checkEmailCode({ email, authCode }) {
   const savedAuthInfo = await Auth.findOne({ email });
 
   if (!savedAuthInfo) {
-    throw new CustomError('Authentication Error', `인증메일 받기를 먼저 요청해주세요.`, { statusCode: 400 });
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, `인증메일 받기를 먼저 요청해주세요.`, { statusCode: 400 });
   }
 
   const isValidTime = new Date().getMinutes() < savedAuthInfo.expiredTime;
   if (!isValidTime) {
-    throw new CustomError('Authentication Error', '인증시간이 초과되었습니다. 다시 인증메일을 받아주세요.', {
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, '인증시간이 초과되었습니다. 다시 인증메일을 받아주세요.', {
       statusCode: 400,
     });
   }
   if (savedAuthInfo.authCode !== authCode) {
-    throw new CustomError('Authentication Error', '인증번호가 일치하지 않습니다.', { statusCode: 400 });
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, '인증번호가 일치하지 않습니다.', { statusCode: 400 });
   }
+}
+
+// 인증 메일 삭제하기
+export async function deleteAuthCode(email) {
+  return await Auth.deleteOne({ email }).catch((err) => {
+    throw new CustomError(commonError.DB_ERROR, '삭제하던 도중 에러가 발생했습니다.', { statusCode: 400, cause: err });
+  });
 }
