@@ -5,6 +5,13 @@ import * as bookmarkService from '../services/bookmarkService.js';
 // 특정 사용자의 모든 북마크 조회
 export async function getAllBookmarksByUserId(req, res) {
   const userId = req.userId;
+
+  if (!userId) {
+    throw new CustomError(commonError.USER_UNKNOWN_ERROR, '조회하려는 특정 사용자를 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
   const bookmarks = await bookmarkService.getAllBookmarksByUserId(userId);
 
   return res.status(200).json({ bookmarks });
@@ -15,6 +22,32 @@ export async function createBookmark(req, res) {
   const userId = req.userId;
   const singleScheduleId = req.body.singleScheduleId;
   const postId = req.body.postId;
+
+  if (!userId) {
+    throw new CustomError(commonError.USER_UNKNOWN_ERROR, '추가하려는 특정 사용자를 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
+  if (!singleScheduleId) {
+    throw new CustomError(
+      commonError.SCHEDULE_UNKNOWN_ERROR,
+      '추가하려는 해당 스케쥴의 고유 아이디값을 찾을 수 없습니다.',
+      {
+        statusCode: 404,
+      },
+    );
+  }
+
+  if (!postId) {
+    throw new CustomError(
+      commonError.POST_UNKNOWN_ERROR,
+      '추가하려는 해당 게시글의 고유 아이디값을 찾을 수 없습니다.',
+      {
+        statusCode: 404,
+      },
+    );
+  }
 
   // 추가하려는 여행장소가 기존에 있는 여행 장소인지 확인
   const result = await bookmarkService.getSingleScheduleIdByPostId(postId, singleScheduleId);
@@ -40,6 +73,23 @@ export async function createBookmark(req, res) {
 export async function deleteBookmarks(req, res) {
   const userId = req.userId;
   const bookmarkIds = req.body.bookmarkId;
+
+  if (!userId) {
+    throw new CustomError(commonError.USER_UNKNOWN_ERROR, '삭제하려는 특정 사용자를 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
+  if (!singleScheduleId) {
+    throw new CustomError(
+      commonError.BOOKMARK_UNKNOWN_ERROR,
+      '삭제하려는 해당 북마크의 고유 아이디값을 찾을 수 없습니다.',
+      {
+        statusCode: 404,
+      },
+    );
+  }
+
   const deletedBookmark = await bookmarkService.deleteBookmarks(userId, bookmarkIds);
 
   if (deletedBookmark === 0) {
