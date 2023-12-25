@@ -18,7 +18,10 @@ router.post('/', isAuth, validator(createComment), asyncHandler(commentControlle
 // 특정 게시물에 작성한 댓글 수정
 router.patch('/:commentId', isAuth, validator(updateComment), asyncHandler(commentController.updateComment));
 
+// 특정 게시물에 작성한 대댓글 삭제
+router.delete('/comment/:commentId', isAuth, asyncHandler(commentController.deleteComment));
+
 // 특정 게시물에 작성한 댓글 삭제
-router.delete('/:commentId', isAuth, asyncHandler(commentController.deleteComment));
+router.delete('/reply/:commentId', isAuth, asyncHandler(commentController.deleteReply));
 
 export default router;

@@ -9,9 +9,7 @@ export async function getAllCommentsByUserId(req, res) {
   const myComments = await commentService.getAllCommentsByUserId(userId);
 
   if (!myComments) {
-    throw new CustomError(commonError.COMMENT_UNKNOWN_ERROR, '댓글을 찾을 수 없습니다.', {
-      statusCode: 404,
-    });
+    res.status(200).json([]);
   }
 
   res.status(200).json({ myComments });
@@ -23,9 +21,7 @@ export async function getCommentsByPostId(req, res) {
   const postComments = await commentService.getCommentsByPostId(postId);
 
   if (!postComments) {
-    throw new CustomError(commonError.COMMENT_UNKNOWN_ERROR, '댓글을 찾을 수 없습니다.', {
-      statusCode: 404,
-    });
+    res.status(200).json([]);
   }
 
   res.status(200).json({ postComments });
@@ -63,12 +59,12 @@ export async function updateComment(req, res) {
   res.status(200).json(updatedComment);
 }
 
-// 5. 특정 게시물에 작성한 댓글 삭제
+// 6. 특정 게시물에 작성한 댓글 삭제
 export async function deleteComment(req, res) {
   const userId = req.userId;
   const commentId = req.params.commentId;
-
   const deletedComment = await commentService.deleteComment(userId, commentId);
+
   if (!deletedComment) {
     throw new CustomError(commonError.COMMENT_UNKNOWN_ERROR, '댓글을 찾을 수 없습니다.', {
       statusCode: 404,
@@ -76,4 +72,19 @@ export async function deleteComment(req, res) {
   }
 
   res.status(204).json(deletedComment);
+}
+
+// 7. 특정 게시물에 작성한 대댓글 삭제
+export async function deleteReply(req, res) {
+  const userId = req.userId;
+  const commentId = req.params.commentId;
+  const deletedReply = await commentService.deleteReply(userId, commentId);
+
+  if (!deletedReply) {
+    throw new CustomError(commonError.COMMENT_UNKNOWN_ERROR, '대댓글을 찾을 수 없습니다.2', {
+      statusCode: 404,
+    });
+  }
+
+  res.status(204).json(deletedReply);
 }
