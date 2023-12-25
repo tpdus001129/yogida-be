@@ -5,12 +5,18 @@ import Post from '../models/schemas/Post.js';
 
 // 1. 찜한 코스 전체 조회
 export async function getAllLikedPosts(userId) {
-  const likePostIds = await Like.find({ userId }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
+  const likePostIds = await Like.find({ userId })
+    .populate({
+      path: 'postId',
+      model: 'Post',
+      select: 'title startDate endDate schedules',
+    })
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
     });
-  });
   return likePostIds;
 }
 
