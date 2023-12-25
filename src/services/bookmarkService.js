@@ -70,7 +70,7 @@ export async function deleteBookmarks(userId, bookmarkIds) {
   const bookmarks = await Bookmark.find({ _id: { $in: bookmarkIds } });
 
   if (bookmarkIds.length !== bookmarks.length) {
-    throw new CustomError(commonError.BOOKMARK_DELETE_ERROR, '삭제할 북마크가 없습니다.', {
+    throw new CustomError(commonError.BOOKMARK_DELETE_ERROR, '해당 북마크가 기존 북마크 목록에 없습니다.', {
       statusCode: 404,
     });
   }
@@ -80,6 +80,10 @@ export async function deleteBookmarks(userId, bookmarkIds) {
   // 저장한 사용자와 삭제할 사용자가 일치한지 확인 -> 삭제
   for (const bookmark of bookmarks) {
     if (!bookmark.authorId.equals(userId)) {
+      throw new CustomError(commonError.USER_MATCH_ERROR, '북마크를 삭제할 권한이 없습니다.', {
+        statusCode: 403,
+      });
+    } else {
       await bookmark.delete({ _id: bookmark._id }).catch((error) => {
         throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
           statusCode: 500,
@@ -88,10 +92,6 @@ export async function deleteBookmarks(userId, bookmarkIds) {
       });
 
       deletedCount++;
-    } else {
-      throw new CustomError(commonError.USER_MATCH_ERROR, '북마크를 삭제할 권한이 없습니다.', {
-        statusCode: 403,
-      });
     }
   }
 
