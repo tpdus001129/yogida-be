@@ -75,39 +75,70 @@ export async function createComment(userId, postId, content, parentComment) {
 // 4. 특정 게시물에 작성한 댓글 수정
 export async function updateComment(commentId, userId, content) {
   const foundComment = await Comment.findById(commentId);
-  const foundReply = await Reply.findById(commentId);
-
-  if (!foundComment && !foundReply) {
+  if (!foundComment) {
     throw new CustomError(commonError.COMMENT_UNKNOWN_ERROR, '해당 댓글을 찾을 수 없습니다.', {
       statusCode: 404,
     });
   }
 
-  const isReply = Boolean(foundReply); // 대댓글인지 확인여부
-  const comment = isReply ? Reply : Comment;
-  const userIdTest = isReply ? foundReply : foundComment;
-
-  if (!userIdTest.authorId.equals(userId)) {
-    // comment.authorId = 댓글 작성자 ID, authorId = 사용자 ID
+  if (!foundComment.authorId.equals(userId)) {
+    // foundComment.authorId = 댓글 작성자 ID, authorId = 사용자 ID
     throw new CustomError(commonError.USER_MATCH_ERROR, '댓글을 수정할 권한이 없습니다.', {
       statusCode: 403,
     });
   }
 
-  const updatedComment = await comment.updateOne({ _id: commentId }, { content }).catch((error) => {
+  const updatedComment = await Comment.findByIdAndUpdate(
+    commentId,
+    { content },
+    { new: true, runValidators: true },
+  ).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
       cause: error,
     });
   });
 
-  if (updatedComment.modifiedCount === 0) {
+  if (!updatedComment) {
     throw new CustomError(commonError.POST_MODIFY_ERROR, '댓글 수정을 실패하였습니다.', {
       statusCode: 404,
     });
   }
 
-  return await comment.findOne({ _id: commentId });
+  return updatedComment;
+}
+
+// 5. 특정 게시물에 작성한 대댓글 수정
+export async function updateReply(commentId, userId, content) {
+  const foundReply = await Reply.findById(commentId);
+  if (!foundReply) {
+    throw new CustomError(commonError.COMMENT_UNKNOWN_ERROR, '해당 대댓글을 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
+  if (!foundReply.authorId.equals(userId)) {
+    throw new CustomError(commonError.USER_MATCH_ERROR, '대댓글을 수정할 권한이 없습니다.', {
+      statusCode: 403,
+    });
+  }
+
+  const updatedReply = await Reply.findByIdAndUpdate(commentId, { content }, { new: true, runValidators: true }).catch(
+    (error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    },
+  );
+
+  if (!updatedReply) {
+    throw new CustomError(commonError.POST_MODIFY_ERROR, '대댓글 수정을 실패하였습니다.', {
+      statusCode: 404,
+    });
+  }
+
+  return updatedReply;
 }
 
 // 6. 특정 게시물에 작성한 댓글 삭제

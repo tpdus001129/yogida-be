@@ -59,6 +59,22 @@ export async function updateComment(req, res) {
   res.status(200).json(updatedComment);
 }
 
+// 5. 특정 게시물에 작성한 대댓글 수정
+export async function updateReply(req, res) {
+  const userId = req.userId;
+  const commentId = req.params.commentId;
+  const content = req.body.content;
+
+  const updatedReply = await commentService.updateReply(commentId, userId, content);
+  if (!updatedReply) {
+    throw new CustomError(commonError.COMMENT_UNKNOWN_ERROR, '대댓글을 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
+  res.status(200).json(updatedReply);
+}
+
 // 6. 특정 게시물에 작성한 댓글 삭제
 export async function deleteComment(req, res) {
   const userId = req.userId;

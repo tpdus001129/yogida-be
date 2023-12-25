@@ -16,7 +16,10 @@ router.get('/:postId', asyncHandler(commentController.getCommentsByPostId));
 router.post('/', isAuth, validator(createComment), asyncHandler(commentController.createComment));
 
 // 특정 게시물에 작성한 댓글 수정
-router.patch('/:commentId', isAuth, validator(updateComment), asyncHandler(commentController.updateComment));
+router.patch('/comment/:commentId', isAuth, validator(updateComment), asyncHandler(commentController.updateComment));
+
+// 특정 게시물에 작성한 대댓글 수정
+router.patch('/reply/:commentId', isAuth, validator(updateComment), asyncHandler(commentController.updateReply));
 
 // 특정 게시물에 작성한 대댓글 삭제
 router.delete('/comment/:commentId', isAuth, asyncHandler(commentController.deleteComment));
