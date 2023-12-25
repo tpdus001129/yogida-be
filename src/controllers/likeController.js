@@ -33,19 +33,12 @@ export async function createLike(req, res) {
   res.status(201).json(like);
 }
 
-// 3. 특정 게시물에 찜 취소
-export async function deleteLike(req, res) {
-  const userId = req.userId;
-  const postId = req.params.postId;
-  await likeService.deleteLike(userId, postId);
-
-  res.status(200).json({ message: '찜이 삭제되었습니다.' });
-}
-
-// 4. 찜하기 전체 취소
+// 3. 찜 삭제
 export async function deleteAllLikes(req, res) {
   const userId = req.userId;
-  await likeService.deleteAllLikes(userId);
+  const bodyData = req.body;
+
+  await likeService.deleteAllLikes(userId, bodyData);
 
   res.status(200).json({ message: '찜이 삭제되었습니다.' });
 }
