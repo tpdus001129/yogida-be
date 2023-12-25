@@ -6,6 +6,11 @@ const bookmarkSchema = new Schema({
     ref: 'User',
     required: true,
   },
+  postId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Post',
+    required: true,
+  },
   singleScheduleId: {
     type: Schema.Types.ObjectId,
     ref: 'SingleSchedule',

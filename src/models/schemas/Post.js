@@ -28,7 +28,7 @@ const postSchema = new Schema(
     // 게시글 태그들
     tag: { type: [String] },
     // 여행 세부 장소들
-    schedules: { type: [[singleSchedule]], ref: 'SingleSchedule', required: true },
+    schedules: { type: [[singleSchedule]], required: true },
     // 세부 장소들 사이 거리
     distances: { type: [[Number]], required: true },
     // 여행 경비

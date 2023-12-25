@@ -21,7 +21,7 @@ export async function getAllPosts() {
 }
 
 // 특정 게시글 조회
-export async function getPostByPostId(postId) {
+export async function getPostById(postId) {
   return await Post.findOne({ _id: postId })
     .populate({ path: 'authorId', select: '_id nickname' })
     .catch((error) => {
@@ -47,18 +47,18 @@ export async function getAllPostsByTags(tags) {
   // 배열인지 검사
   if (!Array.isArray(tags)) {
     throw new CustomError(commonError.POST_TYPE_ERROR, '올바른 요청 값이 아닙니다.', {
-      statusCode: 404,
+      statusCode: 400,
     });
   }
 
   if (tags.length > 5) {
     throw new CustomError(commonError.TAG_COUNT_ERROR, '태그는 최대 5개까지 선택 가능합니다.', {
-      statusCode: 404,
+      statusCode: 400,
     });
   }
 
   // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-  await checkTagListIncludedTag(tags);
+  checkTagListIncludedTag(tags);
 
   // 전체 게시글에서 해당 태그가 있는 게시글만 반환
   return await Post.find({ tag: { $in: tags } }).catch((error) => {
@@ -121,19 +121,18 @@ export async function createPost(
   { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
 ) {
   // 사용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-  await checkTagListIncludedTag(tag);
+  checkTagListIncludedTag(tag);
 
   // 사용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
-  await checkCityListIncludedCity(destination);
+  checkCityListIncludedCity(destination);
 
   // 여행일정과 디데일 일치한지 검사
-  await checkScheduleLengthAndDay(schedules, startDate, endDate);
+  checkScheduleLengthAndDay(schedules, startDate, endDate);
 
   // 세부 장소와 거리 수가 일치한지 검사
-  await checkSchedulePlaceAndDistances(schedules, distances);
+  checkSchedulePlaceAndDistances(schedules, distances);
 
-  // 이 부분에서 likeCount를 0으로 설정하여 추가합니다.
-  return await Post.create({
+  const createdPost = await Post.create({
     authorId: userId,
     title,
     destination,
@@ -147,12 +146,9 @@ export async function createPost(
     isPublic,
     reviewText,
     likeCount: 0,
-  }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
-    });
   });
+
+  return createdPost;
 }
 
 // 특정 사용자의 게시글 수정 (해당 사용자가 수정하는게 맞는지 확인 필수)
@@ -161,25 +157,32 @@ export async function updatePost(
   postId,
   { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
 ) {
-  const post = await Post.findOne({ _id: postId }).lean();
+  const post = await Post.findOne({ _id: postId })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
 
   // post가 있는지 확인
-  await checkPost(post);
+  checkPost(post);
 
   // 작성자와 수정하려는 사용자가 일치한지
-  await checkUserId(post, userId);
+  checkUserId(post, userId);
 
   // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-  await checkTagListIncludedTag(tag);
+  checkTagListIncludedTag(tag);
 
   // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
-  await checkCityListIncludedCity(destination);
+  checkCityListIncludedCity(destination);
 
   // 여행일정과 디데일 일치한지 검사
-  await checkScheduleLengthAndDay(schedules, startDate, endDate);
+  checkScheduleLengthAndDay(schedules, startDate, endDate);
 
   // 세부 장소와 거리 수가 일치한지 검사
-  await checkSchedulePlaceAndDistances(schedules, distances);
+  checkSchedulePlaceAndDistances(schedules, distances);
 
   const updatedPost = await Post.updateOne(
     { _id: postId },
@@ -193,7 +196,6 @@ export async function updatePost(
       distances,
       cost,
       peopleCount,
-      likeCount,
       isPublic,
       reviewText,
     },
@@ -212,13 +214,20 @@ export async function updatePost(
 
 // 특정 사용자의 게시글 삭제
 export async function deletePost(userId, postId) {
-  const post = await Post.findOne({ _id: postId }).lean();
+  const post = await Post.findOne({ _id: postId })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
 
   // post가 있는지 확인
-  await checkPost(post);
+  checkPost(post);
 
   // 작성자와 수정하려는 사용자가 일치한지
-  await checkUserId(userId);
+  checkUserId(userId);
 
   return await Post.deleteOne({ _id: postId }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {

@@ -38,7 +38,7 @@ export const cityList = [
 ];
 
 // 사용자 권한 확인
-export async function checkUserId(post, userId) {
+export function checkUserId(post, userId) {
   if (!post.authorId.equals(userId)) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '게시글을 수정할 권한이 없습니다.', {
       statusCode: 403,
@@ -47,7 +47,7 @@ export async function checkUserId(post, userId) {
 }
 
 // post 유무 확인
-export async function checkPost(post) {
+export function checkPost(post) {
   if (!post) {
     throw new CustomError(commonError.POST_NOT_FOUND, '게시글을 찾을 수 없습니다.', {
       statusCode: 404,
@@ -56,7 +56,7 @@ export async function checkPost(post) {
 }
 
 // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
-export async function checkCityListIncludedCity(city) {
+export function checkCityListIncludedCity(city) {
   if (!cityList.includes(city)) {
     throw new CustomError(commonError.SEARCHED_CITY_UNKNOWN_ERROR, '검색어를 찾을 수 없습니다.', {
       statusCode: 404,
@@ -65,7 +65,7 @@ export async function checkCityListIncludedCity(city) {
 }
 
 // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-export async function checkTagListIncludedTag(tags) {
+export function checkTagListIncludedTag(tags) {
   for (const tag of tags) {
     if (!tagList.includes(tag)) {
       throw new CustomError(commonError.TAG_UNKNOWN_ERROR, '태그를 찾을 수 없습니다.', {
@@ -75,7 +75,7 @@ export async function checkTagListIncludedTag(tags) {
   }
 }
 
-export async function checkScheduleLengthAndDay(schedules, startDate, endDate) {
+export function checkScheduleLengthAndDay(schedules, startDate, endDate) {
   // 여행일정과 관련된 변수 설정
   const singleScheduleLength = schedules.length;
 
@@ -95,7 +95,7 @@ export async function checkScheduleLengthAndDay(schedules, startDate, endDate) {
   }
 }
 
-export async function checkSchedulePlaceAndDistances(schedules, distances) {
+export function checkSchedulePlaceAndDistances(schedules, distances) {
   // 세부 장소와 거리에 관련된 변수 설정
   const singleSchedulePlaceCounts = schedules.map((location) => location.length - 1);
   const distancesCounts = distances.map((distance) => distance.length);

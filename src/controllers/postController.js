@@ -10,9 +10,9 @@ export async function getAllPosts(req, res) {
 }
 
 // 특정 게시글 조회
-export async function getPostByPostId(req, res) {
+export async function getPostById(req, res) {
   const postId = req.params.postId;
-  const post = await postService.getPostByPostId(postId);
+  const post = await postService.getPostById(postId);
 
   if (post === null) {
     throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
@@ -27,12 +27,6 @@ export async function getPostByPostId(req, res) {
 export async function getAllPostsByUserId(req, res) {
   const userId = req.userId;
   const posts = await postService.getAllPostsByUserId(userId);
-
-  if (posts === null) {
-    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
-      statusCode: 200,
-    });
-  }
 
   return res.status(200).json({ posts });
 }
@@ -97,7 +91,7 @@ export async function createPost(req, res) {
   });
 
   if (!result) {
-    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
+    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '이미 같은 ID로 게시글이 등록되어 있습니다.', {
       statusCode: 404,
     });
   }
@@ -142,10 +136,10 @@ export async function deletePost(req, res) {
   const result = await postService.deletePost(userId, postId);
 
   if (!result) {
-    throw new CustomError(commonError.POST_DELETE_ERROR, '게시글 삭제를 실패하였습니다.', {
+    throw new CustomError(commonError.POST_DELETE_ERROR, '해당 게시글이 존재하지 않아 삭제할 수 없습니다', {
       statusCode: 404,
     });
   }
 
-  return res.status(200).json({ message: '게시글이 삭제되었습니다.' });
+  return res.status(204);
 }
