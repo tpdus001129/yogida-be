@@ -11,7 +11,7 @@ const postRouter = express.Router();
 postRouter.get('/', asyncHandler(postController.getAllPosts));
 
 // 특정 사용자의 전체 게시글 조회
-postRouter.get('/my-page', asyncHandler(postController.getAllPostsByUserId));
+postRouter.get('/my-page', isAuth, asyncHandler(postController.getAllPostsByUserId));
 
 // 태그 필터링 된 게시글 조회
 postRouter.get('/filter', asyncHandler(postController.getAllPostsByTags));
@@ -29,7 +29,7 @@ postRouter.get('/most-like', asyncHandler(postController.getPostsByMostLike));
 postRouter.get('/search', asyncHandler(postController.getAllPostsByDestination));
 
 // 게시글 세부 일정 조회 (상세페이지)
-postRouter.get('/:postId', asyncHandler(postController.getPostByPostId));
+postRouter.get('/:postId', asyncHandler(postController.getPostById));
 
 // 게시글 생성
 postRouter.post('/', isAuth, validator(post), asyncHandler(postController.createPost));
