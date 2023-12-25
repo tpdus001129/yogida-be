@@ -2,40 +2,44 @@ import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 
 // 여기다에서 제공되는 태그 목록
-const tagList = [
-  '체험·엠티비티',
-  'SNS 핫플레이스',
-  '자연적인',
-  '유명 관광지',
-  '힐링',
-  '문화·예술·역사',
-  '맛집 탐방',
-  '혼자',
-  '친구와',
-  '연인과',
-  '아이와',
-  '부모님과',
-  '반려견과',
-  '기타',
-];
+const tagList = new Map(
+  [
+    '체험·엑티비티',
+    'SNS 핫플레이스',
+    '자연적인',
+    '유명 관광지',
+    '힐링',
+    '문화·예술·역사',
+    '맛집 탐방',
+    '혼자',
+    '친구와',
+    '연인과',
+    '아이와',
+    '부모님과',
+    '반려견과',
+    '기타',
+  ].map((tag) => [tag, true]),
+);
 
 // 여기다에서 제공되는 여행 목록
-export const cityList = [
-  '국내',
-  '가평·양평',
-  '강릉·속초',
-  '서울',
-  '경주',
-  '부산',
-  '여수',
-  '인천',
-  '전주',
-  '제주',
-  '춘천·홍천',
-  '태안',
-  '통영·거제·남해',
-  '포항·안동',
-];
+const cityList = new Map(
+  [
+    '국내',
+    '가평·양평',
+    '강릉·속초',
+    '서울',
+    '경주',
+    '부산',
+    '여수',
+    '인천',
+    '전주',
+    '제주',
+    '춘천·홍천',
+    '태안',
+    '통영·거제·남해',
+    '포항·안동',
+  ].map((city) => [city.true]),
+);
 
 // 사용자 권한 확인
 export function checkUserId(post, userId) {
@@ -57,7 +61,7 @@ export function checkPost(post) {
 
 // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
 export function checkCityListIncludedCity(city) {
-  if (!cityList.includes(city)) {
+  if (!cityList.has(city)) {
     throw new CustomError(commonError.SEARCHED_CITY_UNKNOWN_ERROR, '검색어를 찾을 수 없습니다.', {
       statusCode: 404,
     });
@@ -67,7 +71,7 @@ export function checkCityListIncludedCity(city) {
 // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
 export function checkTagListIncludedTag(tags) {
   for (const tag of tags) {
-    if (!tagList.includes(tag)) {
+    if (!tagList.has(tag)) {
       throw new CustomError(commonError.TAG_UNKNOWN_ERROR, '태그를 찾을 수 없습니다.', {
         statusCode: 404,
       });

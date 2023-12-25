@@ -12,6 +12,13 @@ export async function getAllPosts(req, res) {
 // 특정 게시글 조회
 export async function getPostById(req, res) {
   const postId = req.params.postId;
+
+  if (!postId) {
+    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글의 고유 아이디 값이 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
   const post = await postService.getPostById(postId);
 
   if (post === null) {
@@ -26,6 +33,13 @@ export async function getPostById(req, res) {
 // 특정 사용자의 게시글 조회
 export async function getAllPostsByUserId(req, res) {
   const userId = req.userId;
+
+  if (!userId) {
+    throw new CustomError(commonError.USER_UNKNOWN_ERROR, '조회하려는 특정 사용자를 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
   const posts = await postService.getAllPostsByUserId(userId);
 
   return res.status(200).json({ posts });
@@ -34,6 +48,12 @@ export async function getAllPostsByUserId(req, res) {
 // 태그로 필터링된 게시글 조회
 export async function getAllPostsByTags(req, res) {
   const tags = req.query.tag.split(',');
+
+  if (!tags) {
+    throw new CustomError(commonError.TAG_UNKNOWN_ERROR, '조회하려는 태그가 없습니다.', {
+      statusCode: 404,
+    });
+  }
 
   const posts = await postService.getAllPostsByTags(tags);
 
@@ -65,6 +85,12 @@ export async function getPostsByMostLike(req, res) {
 export async function getAllPostsByDestination(req, res) {
   const city = req.query.city;
 
+  if (!city) {
+    throw new CustomError(commonError.SEARCHED_CITY_UNKNOWN_ERROR, '조회하려는 여행지가 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
   const posts = await postService.getAllPostsByDestination(city);
 
   return res.status(200).json({ posts });
@@ -73,6 +99,13 @@ export async function getAllPostsByDestination(req, res) {
 // 게시글 추가
 export async function createPost(req, res) {
   const userId = req.userId;
+
+  if (!userId) {
+    throw new CustomError(commonError.USER_UNKNOWN_ERROR, '추가하려는 특정 사용자를 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
   const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
     req.body;
 
@@ -103,6 +136,23 @@ export async function createPost(req, res) {
 export async function updatePost(req, res) {
   const userId = req.userId;
   const postId = req.params.postId;
+
+  if (!userId) {
+    throw new CustomError(commonError.USER_UNKNOWN_ERROR, '수정하려는 특정 사용자를 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
+  if (!postId) {
+    throw new CustomError(
+      commonError.POST_UNKNOWN_ERROR,
+      '수정하려는 해당 게시글의 고유 아이디값을 찾을 수 없습니다.',
+      {
+        statusCode: 404,
+      },
+    );
+  }
+
   const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
     req.body;
 
@@ -133,6 +183,23 @@ export async function updatePost(req, res) {
 export async function deletePost(req, res) {
   const userId = req.userId;
   const postId = req.params.postId;
+
+  if (!userId) {
+    throw new CustomError(commonError.USER_UNKNOWN_ERROR, '삭제하려는 특정 사용자를 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+
+  if (!postId) {
+    throw new CustomError(
+      commonError.POST_UNKNOWN_ERROR,
+      '삭제하려는 해당 게시글의 고유 아이디값을 찾을 수 없습니다.',
+      {
+        statusCode: 404,
+      },
+    );
+  }
+
   const result = await postService.deletePost(userId, postId);
 
   if (!result) {

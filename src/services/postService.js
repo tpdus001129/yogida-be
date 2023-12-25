@@ -12,18 +12,21 @@ import {
 
 // 모든 게시글 조회
 export async function getAllPosts() {
-  return await Post.find({}).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
+  return await Post.find({})
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
     });
-  });
 }
 
 // 특정 게시글 조회
 export async function getPostById(postId) {
   return await Post.findOne({ _id: postId })
     .populate({ path: 'authorId', select: '_id nickname' })
+    .lean()
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
         statusCode: 500,
@@ -34,12 +37,14 @@ export async function getPostById(postId) {
 
 //특정 사용자의 게시글 조회
 export async function getAllPostsByUserId(userId) {
-  return await Post.find({ authorId: userId }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
+  return await Post.find({ authorId: userId })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
     });
-  });
 }
 
 // 태그 필터링된 게시글 조회
@@ -61,18 +66,21 @@ export async function getAllPostsByTags(tags) {
   checkTagListIncludedTag(tags);
 
   // 전체 게시글에서 해당 태그가 있는 게시글만 반환
-  return await Post.find({ tag: { $in: tags } }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
+  return await Post.find({ tag: { $in: tags } })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
     });
-  });
 }
 
 // 최신순으로 게시글 조회
 export async function getPostsByLatest() {
   return await Post.find({})
     .sort({ updatedAt: -1 })
+    .lean()
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
         statusCode: 500,
@@ -85,6 +93,7 @@ export async function getPostsByLatest() {
 export async function getPostsByOldest() {
   return await Post.find({})
     .sort({ updatedAt: 1 })
+    .lean()
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
         statusCode: 500,
@@ -97,6 +106,7 @@ export async function getPostsByOldest() {
 export async function getPostsByMostLike() {
   return await Post.find({})
     .sort({ likeCount: -1 })
+    .lean()
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
         statusCode: 500,
@@ -107,12 +117,14 @@ export async function getPostsByMostLike() {
 
 // 검색된 여행지로 게시글 조회
 export async function getAllPostsByDestination(city) {
-  return await Post.find({ destination: city }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
+  return await Post.find({ destination: city })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
     });
-  });
 }
 
 // 게시글 추가

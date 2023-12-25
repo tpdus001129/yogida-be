@@ -7,6 +7,7 @@ import Post from '../models/schemas/Post.js';
 export async function getAllBookmarksByUserId(userId) {
   const bookmark = await Bookmark.find({ authorId: userId })
     .populate({ path: 'postId', model: 'Post', select: 'schedules' })
+    .lean()
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
         statusCode: 500,
@@ -20,7 +21,6 @@ export async function getAllBookmarksByUserId(userId) {
   const selectedSchedule = bookmark.flatMap((bookmark) => {
     const allSchedules = bookmark.postId.schedules.flat();
     const matchingSchedule = allSchedules.find((schedule) => singleScheduleIds.some((id) => id.equals(schedule._id)));
-
     return matchingSchedule ? [matchingSchedule] : [];
   });
 
@@ -29,7 +29,7 @@ export async function getAllBookmarksByUserId(userId) {
 
 // 사용자가 즐겨찾기로 추가하려는 여행 장소가 실제로 post에 저장되어있는지 확인
 export async function getSingleScheduleIdByPostId(postId, singleScheduleId) {
-  const post = await Post.findById(postId);
+  const post = await Post.findById(postId).lean();
   const singleScheduleIds = post.schedules.flatMap((scheduleList) => scheduleList.map((schedule) => schedule._id));
 
   return singleScheduleIds.find((s) => s.toString() === singleScheduleId);
@@ -37,7 +37,11 @@ export async function getSingleScheduleIdByPostId(postId, singleScheduleId) {
 
 // 특정 사용자의 북마크 추가
 export async function createBookmark(userId, singleScheduleId, postId) {
-  const findBookmark = await Bookmark.findOne({ authorId: userId, singleScheduleId: singleScheduleId, postId: postId });
+  const findBookmark = await Bookmark.findOne({
+    authorId: userId,
+    singleScheduleId: singleScheduleId,
+    postId: postId,
+  }).lean();
 
   if (findBookmark) {
     throw new CustomError(commonError.BOOKMARK_CREATE_ERROR, '이미 북마크에 추가되어있습니다.', {
@@ -67,7 +71,7 @@ export async function deleteBookmarks(userId, bookmarkIds) {
     });
   }
 
-  const bookmarks = await Bookmark.find({ _id: { $in: bookmarkIds } });
+  const bookmarks = await Bookmark.find({ _id: { $in: bookmarkIds } }).lean();
 
   if (bookmarkIds.length !== bookmarks.length) {
     throw new CustomError(commonError.BOOKMARK_DELETE_ERROR, '해당 북마크가 기존 북마크 목록에 없습니다.', {
@@ -84,7 +88,7 @@ export async function deleteBookmarks(userId, bookmarkIds) {
         statusCode: 403,
       });
     } else {
-      await bookmark.delete({ _id: bookmark._id }).catch((error) => {
+      await bookmark.deleteOne({ _id: bookmark._id }).catch((error) => {
         throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
           statusCode: 500,
           cause: error,

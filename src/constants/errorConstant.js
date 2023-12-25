@@ -1,7 +1,9 @@
 const commonError = Object.seal({
   DB_ERROR: 'DB Error',
   UNKNOWN_ERROR: 'Unknown Error',
+
   USER_MATCH_ERROR: 'User Match Error',
+  USER_UNKNOWN_ERROR: 'User Unknown Error',
 
   POST_UNKNOWN_ERROR: 'Post Unknown Error',
   POST_TYPE_ERROR: 'Post Type Error',
@@ -12,6 +14,7 @@ const commonError = Object.seal({
   TAG_COUNT_ERROR: 'Tag Count Error',
   SEARCHED_CITY_UNKNOWN_ERROR: 'Searched City Unknown Error',
 
+  SCHEDULE_UNKNOWN_ERROR: 'Schedule Unknown Error',
   SCHEDULE_MATCH_ERROR: 'Schedule Match Error',
   SCHEDULE_EXIST_ERROR: 'Schedule Exist Error',
 
