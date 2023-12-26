@@ -43,13 +43,26 @@ export async function deleteAllLikes(userId, bodyData) {
     });
   }
 
-  if (!user.includes(userId.toString())) {
-    throw new CustomError(commonError.LIKE_UNKNOWN_ERROR, '찜을 삭제할 권한이 없습니다.', {
+  const userMap = new Map();
+  user.forEach((userId) => {
+    userMap.set(userId.toString(), true);
+  });
+
+  if (!userMap.has(userId.toString())) {
+    throw new CustomError(commonError.USER_MATCH_ERROR, '찜을 삭제할 권한이 없습니다.', {
       statusCode: 403,
     });
   }
 
+  let deletedLike;
   for (let i = 0; i < user.length; i++) {
-    await Like.deleteMany({ userId: user[i], postId: post[i] });
+    deletedLike = await Like.deleteMany({ userId: user[i], postId: post[i] }).catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
   }
+
+  return deletedLike;
 }

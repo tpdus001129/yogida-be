@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', isAuth, asyncHandler(likeController.getAllLikedPosts));
 
 // 특정 게시물에 찜하기
-router.post('/:postId', isAuth, asyncHandler(likeController.createLike));
+router.post('/', isAuth, asyncHandler(likeController.createLike));
 
 // 찜 삭제
 router.patch('/', isAuth, asyncHandler(likeController.deleteAllLikes));

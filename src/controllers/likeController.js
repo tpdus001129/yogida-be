@@ -9,9 +9,7 @@ export async function getAllLikedPosts(req, res) {
   const likedPosts = await likeService.getAllLikedPosts(userId);
 
   if (!likedPosts) {
-    throw new CustomError(commonError.LIKE_UNKNOWN_ERROR, '찜을 찾을 수 없습니다.', {
-      statusCode: 404,
-    });
+    res.status(200).json([]);
   }
 
   res.status(200).json({ likedPosts });
@@ -20,7 +18,7 @@ export async function getAllLikedPosts(req, res) {
 // 2. 특정 게시물에 찜하기
 export async function createLike(req, res) {
   const userId = req.userId;
-  const postId = req.params.postId;
+  const postId = req.body.postId;
   const like = await likeService.createLike(userId, postId);
 
   if (!like) {
@@ -37,8 +35,13 @@ export async function createLike(req, res) {
 export async function deleteAllLikes(req, res) {
   const userId = req.userId;
   const bodyData = req.body;
+  const deletedLike = await likeService.deleteAllLikes(userId, bodyData);
 
-  await likeService.deleteAllLikes(userId, bodyData);
+  if (!deletedLike) {
+    throw new CustomError(commonError.LIKE_UNKNOWN_ERROR, '찜을 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
 
-  res.status(200).json({ message: '찜이 삭제되었습니다.' });
+  res.status(204).json(deletedLike);
 }
