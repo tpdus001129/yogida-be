@@ -1,6 +1,6 @@
 import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
-import Alarm from '../models/schemas/AlarmSchema.js';
+import Alarm from '../models/schemas/Alarm.js';
 import Post from '../models/schemas/Post.js';
 
 // receiverId 로 검색
@@ -34,14 +34,15 @@ export async function deleteAlarm(userId, alarmId) {
   }
 
   return await Alarm.deleteOne({ receiverId: userId }).catch((err) => {
-    throw new CustomError(commonError.DB_ERROR, '삭제 도중 오류가 생겼습니다.', { statusCode: 400, cause: err });
+    throw new CustomError(commonError.DB_ERROR, '삭제 도중 오류가 생겼습니다.', { statusCode: 500, cause: err });
   });
 }
 
 // 모든 알람 삭제하기
-export async function deleteAllAlarams(userId) {
+export async function deleteAllAlarms(userId) {
+  console.log(userId);
   return await Alarm.deleteMany({ receiverId: userId }).catch((err) => {
-    throw new CustomError(commonError.DB_ERROR, '삭제 도중 오류가 생겼습니다.', { statusCode: 400, cause: err });
+    throw new CustomError(commonError.DB_ERROR, '삭제 도중 오류가 생겼습니다.', { statusCode: 500, cause: err });
   });
 }
 
@@ -51,18 +52,17 @@ export async function readAlarm(alarmId) {
     .populate({ path: 'receiverId', select: '-_id nickname' })
     .populate({ path: 'senderId', select: '-_id nickname' })
     .catch((err) => {
-      throw new CustomError(commonError.DB_ERROR, '업데이트 도중 오류가 생겼습니다.', { statusCode: 400, cause: err });
+      throw new CustomError(commonError.DB_ERROR, '업데이트 도중 오류가 생겼습니다.', { statusCode: 500, cause: err });
     });
 }
 
 // 알람 생성하기
 export async function createAlarm(postId, senderId, alarmType) {
-  // 포스트의 author를 찾아서 revicer 로 설정
-  const receiverId = await Post.findOne({ _id: postId }, { authorId: 1 });
-  console.log(receiverId);
+  // 포스트의 author를 찾아서 receiver 로 설정
+  const foundPost = await Post.findOne({ _id: postId }, { authorId: 1 });
 
   const alarm = new Alarm({
-    receiverId,
+    receiverId: foundPost.authorId,
     senderId,
     alarmType,
     isRead: false,
@@ -70,7 +70,7 @@ export async function createAlarm(postId, senderId, alarmType) {
 
   return await Alarm.create(alarm).catch((err) => {
     throw new CustomError(commonError.DB_ERROR, '알람을 생성하는 도중 오류가 생겼습니다.', {
-      statusCode: 400,
+      statusCode: 500,
       cause: err,
     });
   });

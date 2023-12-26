@@ -45,7 +45,6 @@ export async function kakaoAuthRedirectHandler(req, res) {
 // 회원가입
 export async function signup(req, res) {
   const { snsId, email, password, nickname, profileImageUrl, type } = req.body;
-  console.log(req.body);
   let token;
   if (type === 'kakao') {
     token = await authService.snsSignup(snsId, email, nickname, profileImageUrl);
