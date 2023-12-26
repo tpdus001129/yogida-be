@@ -2,6 +2,8 @@ import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 
 // 여기다에서 제공되는 태그 목록
+const sortList = new Map(['최신순', '오래된순', '찜많은순'].map((sort) => [sort, true]));
+
 const tagList = new Map(
   [
     '체험·엑티비티',
@@ -38,7 +40,7 @@ const cityList = new Map(
     '태안',
     '통영·거제·남해',
     '포항·안동',
-  ].map((city) => [city.true]),
+  ].map((city) => [city, true]),
 );
 
 // 사용자 권한 확인
@@ -60,16 +62,25 @@ export function checkPost(post) {
 }
 
 // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
-export function checkCityListIncludedCity(city) {
+export function checkSortListHasSort(sort) {
+  if (!sortList.has(sort)) {
+    throw new CustomError(commonError.SORT_TAG_UNKNOWN_ERROR, '제공된 정렬 기준 목록에서 찾을 수 없습니다.', {
+      statusCode: 404,
+    });
+  }
+}
+
+// 시용자가 선택한 정렬기준이 기존에 제공된 정렬기준인지 검사
+export function checkCityListHasCity(city) {
   if (!cityList.has(city)) {
-    throw new CustomError(commonError.SEARCHED_CITY_UNKNOWN_ERROR, '검색어를 찾을 수 없습니다.', {
+    throw new CustomError(commonError.SEARCHED_CITY_UNKNOWN_ERROR, '여행지를 찾을 수 없습니다.', {
       statusCode: 404,
     });
   }
 }
 
 // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-export function checkTagListIncludedTag(tags) {
+export function checkTagListHasTag(tags) {
   for (const tag of tags) {
     if (!tagList.has(tag)) {
       throw new CustomError(commonError.TAG_UNKNOWN_ERROR, '태그를 찾을 수 없습니다.', {

@@ -80,7 +80,7 @@ export async function deleteBookmarks(req, res) {
     });
   }
 
-  if (!singleScheduleId) {
+  if (!bookmarkIds) {
     throw new CustomError(
       commonError.BOOKMARK_UNKNOWN_ERROR,
       '삭제하려는 해당 북마크의 고유 아이디값을 찾을 수 없습니다.',

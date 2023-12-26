@@ -49,12 +49,14 @@ export async function createBookmark(userId, singleScheduleId, postId) {
     });
   }
 
-  return await Bookmark.create({ authorId: userId, singleScheduleId, postId }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
-    });
-  });
+  return await Bookmark.create({ authorId: userId, singleScheduleId: singleScheduleId, postId: postId }).catch(
+    (error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    },
+  );
 }
 
 // 특정 유저의 북마크 삭제
@@ -88,7 +90,7 @@ export async function deleteBookmarks(userId, bookmarkIds) {
         statusCode: 403,
       });
     } else {
-      await bookmark.deleteOne({ _id: bookmark._id }).catch((error) => {
+      await Bookmark.deleteOne({ _id: bookmark._id }).catch((error) => {
         throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
           statusCode: 500,
           cause: error,
