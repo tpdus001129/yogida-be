@@ -16,7 +16,7 @@ export async function snsSignup(snsId, email, nickname, profileImageUrl) {
 
   if (hasEmail) {
     throw new CustomError(commonError.AUTHENTICATION_ERROR, '이미 가입된 이메일 입니다.', {
-      statusCode: 500,
+      statusCode: 409, // conflict
     });
   }
 
@@ -73,18 +73,17 @@ export async function signup(email, password, nickname) {
 export async function login(email, password) {
   const user = await User.findOne({ email }).lean();
 
-  if (user.provider === 'kakao') {
-    throw new CustomError(
-      commonError.AUTHENTICATION_ERROR,
-      '카카오 계정으로 가입된 이메일 입니다. \n카카오 로그인을 이용하세요',
-      { statusCode: 400 },
-    );
-  }
-
   if (!user) {
     throw new CustomError(commonError.AUTHENTICATION_ERROR, '이메일과 비밀번호를 확인해 주세요.', { statusCode: 400 });
   }
 
+  if (user.provider === 'kakao') {
+    throw new CustomError(
+      commonError.AUTHENTICATION_ERROR,
+      '카카오 계정으로 가입된 이메일 입니다. \n카카오 로그인을 이용하세요',
+      { statusCode: 409 },
+    );
+  }
   const isValidPassword = await bcrypt.compare(password, user.password);
 
   if (!isValidPassword) {
@@ -123,7 +122,7 @@ export async function sendAuthenticationEmail(email) {
 
   //이미 DB에 이메일이 있다면
   if (isEmailSaved) {
-    throw new CustomError(commonError.AUTHENTICATION_ERROR, '이미 등록되어 있는 이메일입니다.', { statusCode: 400 });
+    throw new CustomError(commonError.AUTHENTICATION_ERROR, '이미 등록되어 있는 이메일입니다.', { statusCode: 409 });
   }
 
   //이미 인증db에 정보가 있는지 확인
@@ -216,6 +215,6 @@ export async function checkEmailCode({ email, authCode }) {
 // 인증 메일 삭제하기
 export async function deleteAuthCode(email) {
   return await Auth.deleteOne({ email }).catch((err) => {
-    throw new CustomError(commonError.DB_ERROR, '삭제하던 도중 에러가 발생했습니다.', { statusCode: 400, cause: err });
+    throw new CustomError(commonError.DB_ERROR, '삭제하던 도중 에러가 발생했습니다.', { statusCode: 500, cause: err });
   });
 }

@@ -8,11 +8,11 @@ const alarmRouter = express.Router();
 // 자신의 모든 알람 보기
 alarmRouter.get('/', isAuth, asyncHandler(alarmController.getAllAlarms));
 
-// 특정 알람 삭제하기
-alarmRouter.delete('/delete/:alarmId', isAuth, asyncHandler(alarmController.deleteAlarm));
+// 모든 알람 삭제하기
+alarmRouter.delete('/all', isAuth, asyncHandler(alarmController.deleteAllAlarms));
 
 // 특정 알람 삭제하기
-alarmRouter.delete('/delete-all', isAuth, asyncHandler(alarmController.deleteAllAlarms));
+alarmRouter.delete('/:alarmId', isAuth, asyncHandler(alarmController.deleteAlarm));
 
 // 특정 알람 읽음 처리 하기
 alarmRouter.patch('/:alarmId', isAuth, asyncHandler(alarmController.readAlarm));

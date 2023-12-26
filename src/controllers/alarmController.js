@@ -18,23 +18,24 @@ export async function deleteAlarm(req, res) {
   const foundAlarm = await alarmService.getAlarmByAlarmId(alarmId); //알람 찾기.
 
   if (!foundAlarm) {
-    throw new CustomError(commonError.USER_MATCH_ERROR, '알람이 존재 하지 않습니다.');
+    throw new CustomError(commonError.USER_MATCH_ERROR, '알람이 존재 하지 않습니다.', { statusCode: 204 });
   }
 
   await alarmService.deleteAlarm(userId, alarmId);
 
   // 결과 반환
-  return res.status(200).json({ message: '삭제 성공' });
+  return res.status(204).json({ message: '삭제 성공' });
 }
 
 // 알람 전체 삭제하기
 export async function deleteAllAlarms(req, res) {
   const userId = req.userId;
 
-  await alarmService.deleteAllAlarams(userId);
+  const result = await alarmService.deleteAllAlarms(userId);
+  console.log(result);
 
   // 결과 반환
-  return res.status(200).json({ message: '전체 삭제 성공' });
+  return res.status(204).json({ message: '전체 삭제 성공' });
 }
 
 // 특정 알람 읽음 처리 하기.
