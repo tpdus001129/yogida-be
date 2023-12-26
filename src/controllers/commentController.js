@@ -17,7 +17,7 @@ export async function getAllCommentsByUserId(req, res) {
 
 // 2. 게시물에 있는 댓글 조회
 export async function getCommentsByPostId(req, res) {
-  const postId = req.params.postId;
+  const postId = req.query.postId;
   const postComments = await commentService.getCommentsByPostId(postId);
 
   if (!postComments) {

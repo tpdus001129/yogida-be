@@ -7,10 +7,10 @@ import { isAuth } from '../../middleware/isAuth.js';
 const router = express.Router();
 
 // 마이페이지에서 내가 썼던 댓글 조회
-router.get('/', isAuth, asyncHandler(commentController.getAllCommentsByUserId));
+router.get('/my-page', isAuth, asyncHandler(commentController.getAllCommentsByUserId));
 
 // 게시물에 있는 댓글 조회
-router.get('/:postId', asyncHandler(commentController.getCommentsByPostId));
+router.get('/', asyncHandler(commentController.getCommentsByPostId));
 
 // 특정 게시물에 댓글 작성
 router.post('/', isAuth, validator(createComment), asyncHandler(commentController.createComment));
