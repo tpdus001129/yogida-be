@@ -5,7 +5,7 @@ import Post from '../models/schemas/Post.js';
 
 // 특정 사용자의 모든 북마크 조회
 export async function getAllBookmarksByUserId(userId) {
-  const bookmark = await Bookmark.find({ authorId: userId })
+  const bookmarks = await Bookmark.find({ authorId: userId })
     .populate({ path: 'postId', model: 'Post', select: 'schedules' })
     .lean()
     .catch((error) => {
@@ -15,13 +15,21 @@ export async function getAllBookmarksByUserId(userId) {
       });
     });
 
-  const singleScheduleIds = bookmark.map((i) => i.singleScheduleId);
+  // ObjectId를 포함한 북마크 정보 반환
+  const bookmarksWithObjectId = bookmarks.map((bookmark) => {
+    return {
+      ...bookmark,
+      bookmarkId: bookmark._id,
+    };
+  });
+
+  const singleScheduleIds = bookmarks.map((i) => i.singleScheduleId);
 
   // 북마크가 담고 있는 singleSchedule의 내용들을 반환
-  const selectedSchedule = bookmark.flatMap((bookmark) => {
+  const selectedSchedule = bookmarksWithObjectId.flatMap((bookmark) => {
     const allSchedules = bookmark.postId.schedules.flat();
     const matchingSchedule = allSchedules.find((schedule) => singleScheduleIds.some((id) => id.equals(schedule._id)));
-    return matchingSchedule ? [matchingSchedule] : [];
+    return matchingSchedule ? { ...matchingSchedule, bookmarkId: bookmark.bookmarkId } : [];
   });
 
   return selectedSchedule;
@@ -86,19 +94,24 @@ export async function deleteBookmarks(userId, bookmarkIds) {
   // 저장한 사용자와 삭제할 사용자가 일치한지 확인 -> 삭제
   for (const bookmark of bookmarks) {
     if (!bookmark.authorId.equals(userId)) {
-      throw new CustomError(commonError.USER_MATCH_ERROR, '북마크를 삭제할 권한이 없습니다.', {
-        statusCode: 403,
-      });
-    } else {
-      await Bookmark.deleteOne({ _id: bookmark._id }).catch((error) => {
-        throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-          statusCode: 500,
-          cause: error,
-        });
-      });
-
-      deletedCount++;
+      // Skip bookmarks with different authorId
+      continue;
     }
+
+    await Bookmark.deleteMany({ _id: { $in: bookmarkIds }, authorId: userId }).catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+
+    deletedCount++;
+  }
+
+  if (deletedCount === 0) {
+    throw new CustomError(commonError.USER_MATCH_ERROR, '북마크를 삭제할 권한이 없습니다.', {
+      statusCode: 403,
+    });
   }
 
   return deletedCount;
