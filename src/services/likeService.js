@@ -54,12 +54,15 @@ export async function deleteAllLikes(userId, bodyData) {
     });
   }
 
+  let deletedLike;
   for (let i = 0; i < user.length; i++) {
-    await Like.deleteMany({ userId: user[i], postId: post[i] }).catch((error) => {
+    deletedLike = await Like.deleteMany({ userId: user[i], postId: post[i] }).catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
         statusCode: 500,
         cause: error,
       });
     });
   }
+
+  return deletedLike;
 }
