@@ -9,56 +9,12 @@ import {
   checkSortListHasSort,
   checkScheduleLengthAndDay,
   checkSchedulePlaceAndDistances,
+  getCommonAggregate,
 } from '../utils/post.js';
 
 /// 모든 게시글 조회
 export async function getAllPosts() {
-  const posts = await Post.aggregate([
-    {
-      $lookup: {
-        from: 'likes',
-        localField: '_id',
-        foreignField: 'postId',
-        as: 'likes',
-      },
-    },
-    {
-      $lookup: {
-        from: 'comments',
-        localField: '_id',
-        foreignField: 'postId',
-        as: 'comments',
-      },
-    },
-    {
-      $lookup: {
-        from: 'replies',
-        localField: '_id',
-        foreignField: 'postId',
-        as: 'replies',
-      },
-    },
-    {
-      $project: {
-        authorId: 1,
-        title: 1,
-        destination: 1,
-        startDate: 1,
-        endDate: 1,
-        tag: 1,
-        schedules: 1,
-        distances: 1,
-        cost: 1,
-        peopleCount: 1,
-        likeCount: { $size: '$likes' },
-        CommentCount: { $add: [{ $size: '$comments' }, { $size: '$replies' }] },
-        isPublic: 1,
-        reviewText: 1,
-        createdAt: 1,
-        updatedAt: 1,
-      },
-    },
-  ]).catch((error) => {
+  const posts = await Post.aggregate(getCommonAggregate()).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
       cause: error,
@@ -112,28 +68,24 @@ export async function getAllPostsByTags(tags) {
   checkTagListHasTag(tags);
 
   // 전체 게시글에서 해당 태그가 있는 게시글만 반환
-  return await Post.find({ tag: { $in: tags } })
-    .lean()
-    .catch((error) => {
-      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-        statusCode: 500,
-        cause: error,
-      });
+  return await Post.aggregate([...getCommonAggregate(), { $match: { tag: { $in: tags } } }]).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
     });
+  });
 }
 
 // 검색된 여행지로 게시글 조회
 export async function getAllPostsByDestination(city) {
   checkCityListHasCity(city);
 
-  return await Post.find({ destination: city })
-    .lean()
-    .catch((error) => {
-      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-        statusCode: 500,
-        cause: error,
-      });
+  return await Post.aggregate([...getCommonAggregate(), { $match: { destination: city } }]).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
     });
+  });
 }
 
 export async function getPostsBySort(sort, posts) {
@@ -146,6 +98,7 @@ export async function getPostsBySort(sort, posts) {
     return posts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
   } else {
     //찜많은순으로 정렬
+    return posts.sort((a, b) => b.likeCount - a.likeCount);
   }
 }
 

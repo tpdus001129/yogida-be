@@ -122,3 +122,53 @@ export function checkSchedulePlaceAndDistances(schedules, distances) {
     });
   }
 }
+
+// likeCount, commentCount를 위한 함수
+export function getCommonAggregate() {
+  return [
+    {
+      $lookup: {
+        from: 'likes',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'likes',
+      },
+    },
+    {
+      $lookup: {
+        from: 'comments',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'comments',
+      },
+    },
+    {
+      $lookup: {
+        from: 'replies',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'replies',
+      },
+    },
+    {
+      $project: {
+        authorId: 1,
+        title: 1,
+        destination: 1,
+        startDate: 1,
+        endDate: 1,
+        tag: 1,
+        schedules: 1,
+        distances: 1,
+        cost: 1,
+        peopleCount: 1,
+        likeCount: { $size: '$likes' },
+        CommentCount: { $add: [{ $size: '$comments' }, { $size: '$replies' }] },
+        isPublic: 1,
+        reviewText: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    },
+  ];
+}

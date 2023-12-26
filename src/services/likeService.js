@@ -1,7 +1,6 @@
 import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 import Like from '../models/schemas/Like.js';
-import Post from '../models/schemas/Post.js';
 
 // 1. 찜한 코스 전체 조회
 export async function getAllLikedPosts(userId) {
@@ -22,7 +21,6 @@ export async function getAllLikedPosts(userId) {
 
 // 2. 특정 게시물에 찜하기
 export async function createLike(userId, postId) {
-  await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } });
   const createdLike = await Like.create({ userId, postId }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
