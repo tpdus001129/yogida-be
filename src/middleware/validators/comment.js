@@ -7,9 +7,7 @@ export const createComment = Joi.object({
     parentComment: Joi.string(),
   }),
   query: Joi.object(),
-  params: Joi.object({
-    commentId: Joi.string().required(),
-  }),
+  params: Joi.object(),
 });
 
 export const updateComment = Joi.object({
