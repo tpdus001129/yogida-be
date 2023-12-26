@@ -33,7 +33,7 @@ export async function deleteAlarm(userId, alarmId) {
     throw new CustomError(commonError.USER_MATCH_ERROR, '자신의 알람이 아닙니다.');
   }
 
-  return await Alarm.deleteOne({ receiverId: userId }).catch((err) => {
+  return await Alarm.deleteOne({ _id: alarmId }).catch((err) => {
     throw new CustomError(commonError.DB_ERROR, '삭제 도중 오류가 생겼습니다.', { statusCode: 500, cause: err });
   });
 }
