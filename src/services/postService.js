@@ -4,8 +4,9 @@ import Post from '../models/schemas/Post.js';
 import {
   checkPost,
   checkUserId,
-  checkTagListIncludedTag,
-  checkCityListIncludedCity,
+  checkTagListHasTag,
+  checkCityListHasCity,
+  checkSortListHasSort,
   checkScheduleLengthAndDay,
   checkSchedulePlaceAndDistances,
 } from '../utils/post.js';
@@ -63,7 +64,7 @@ export async function getAllPostsByTags(tags) {
   }
 
   // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-  checkTagListIncludedTag(tags);
+  checkTagListHasTag(tags);
 
   // 전체 게시글에서 해당 태그가 있는 게시글만 반환
   return await Post.find({ tag: { $in: tags } })
@@ -76,47 +77,10 @@ export async function getAllPostsByTags(tags) {
     });
 }
 
-// 최신순으로 게시글 조회
-export async function getPostsByLatest() {
-  return await Post.find({})
-    .sort({ updatedAt: -1 })
-    .lean()
-    .catch((error) => {
-      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-        statusCode: 500,
-        cause: error,
-      });
-    });
-}
-
-// 오래된 순으로 게시글 조회
-export async function getPostsByOldest() {
-  return await Post.find({})
-    .sort({ updatedAt: 1 })
-    .lean()
-    .catch((error) => {
-      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-        statusCode: 500,
-        cause: error,
-      });
-    });
-}
-
-// 찜 많은 순으로 게시글 조회
-export async function getPostsByMostLike() {
-  return await Post.find({})
-    .sort({ likeCount: -1 })
-    .lean()
-    .catch((error) => {
-      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-        statusCode: 500,
-        cause: error,
-      });
-    });
-}
-
 // 검색된 여행지로 게시글 조회
 export async function getAllPostsByDestination(city) {
+  checkCityListHasCity(city);
+
   return await Post.find({ destination: city })
     .lean()
     .catch((error) => {
@@ -127,16 +91,29 @@ export async function getAllPostsByDestination(city) {
     });
 }
 
+export async function getPostsBySort(sort, posts) {
+  // 사용자가 선택한 정렬 기준이 기존에 제공된 기준인지 검사
+  checkSortListHasSort(sort);
+
+  if (sort === '최신순') {
+    return posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sort === '오래된순') {
+    return [...posts].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  } else {
+    //찜많은순으로 정렬
+  }
+}
+
 // 게시글 추가
 export async function createPost(
   userId,
   { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
 ) {
   // 사용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-  checkTagListIncludedTag(tag);
+  checkTagListHasTag(tag);
 
   // 사용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
-  checkCityListIncludedCity(destination);
+  checkCityListHasCity(destination);
 
   // 여행일정과 디데일 일치한지 검사
   checkScheduleLengthAndDay(schedules, startDate, endDate);
@@ -185,10 +162,10 @@ export async function updatePost(
   checkUserId(post, userId);
 
   // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-  checkTagListIncludedTag(tag);
+  checkTagListHasTag(tag);
 
   // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
-  checkCityListIncludedCity(destination);
+  checkCityListHasCity(destination);
 
   // 여행일정과 디데일 일치한지 검사
   checkScheduleLengthAndDay(schedules, startDate, endDate);

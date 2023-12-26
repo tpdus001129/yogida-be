@@ -2,9 +2,43 @@ import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 import * as postService from '../services/postService.js';
 
-// 모든 게시글 조회
-export async function getAllPosts(req, res) {
-  const posts = await postService.getAllPosts();
+export async function getPosts(req, res) {
+  const filter = req.query;
+
+  let posts = [];
+
+  // 전체 조회
+  if (Object.keys(filter).length === 0 || !postId) {
+    const allPosts = await postService.getAllPosts();
+    posts.push(...allPosts);
+  }
+
+  // 여행지로 조회
+  if (filter.city) {
+    const postsByDestination = await postService.getAllPostsByDestination(filter.city);
+    posts.push(...postsByDestination);
+  }
+
+  // 태그로 조회
+  if (filter.tag) {
+    const tags = filter.tag.split(',');
+    const postsByTags = await postService.getAllPostsByTags(tags);
+    posts.push(...postsByTags);
+  }
+
+  if (filter.sort) {
+    const sort = filter.sort;
+
+    // 정렬기준(최신순, 오래된순, 찜많은 순) 중복 선택되었는지 검사
+    if (sort.split(',').length > 1) {
+      throw new CustomError(commonError.TAG_COUNT_ERROR, '정렬 기준 선택지는 하나만 선택 가능합니다.', {
+        statusCode: 404,
+      });
+    }
+
+    const sortedPosts = await postService.getPostsBySort(sort, posts);
+    posts = sortedPosts;
+  }
 
   return res.status(200).json({ posts });
 }
@@ -21,12 +55,6 @@ export async function getPostById(req, res) {
 
   const post = await postService.getPostById(postId);
 
-  if (post === null) {
-    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '해당 게시글을 찾을 수 없습니다.', {
-      statusCode: 404,
-    });
-  }
-
   return res.status(200).json(post);
 }
 
@@ -41,57 +69,6 @@ export async function getAllPostsByUserId(req, res) {
   }
 
   const posts = await postService.getAllPostsByUserId(userId);
-
-  return res.status(200).json({ posts });
-}
-
-// 태그로 필터링된 게시글 조회
-export async function getAllPostsByTags(req, res) {
-  const tags = req.query.tag.split(',');
-
-  if (!tags) {
-    throw new CustomError(commonError.TAG_UNKNOWN_ERROR, '조회하려는 태그가 없습니다.', {
-      statusCode: 404,
-    });
-  }
-
-  const posts = await postService.getAllPostsByTags(tags);
-
-  return res.status(200).json({ posts });
-}
-
-// 최신순으로 게시글 조회
-export async function getPostsByLatest(req, res) {
-  const posts = await postService.getPostsByLatest();
-
-  return res.status(200).json({ posts });
-}
-
-// 오래된 순으로 게시글 조회
-export async function getPostsByOldest(req, res) {
-  const posts = await postService.getPostsByOldest();
-
-  return res.status(200).json({ posts });
-}
-
-// 찜 많은 순으로 게시글 조회
-export async function getPostsByMostLike(req, res) {
-  const posts = await postService.getPostsByMostLike();
-
-  return res.status(200).json({ posts });
-}
-
-// 검색된 여행지로 게시글 조회
-export async function getAllPostsByDestination(req, res) {
-  const city = req.query.city;
-
-  if (!city) {
-    throw new CustomError(commonError.SEARCHED_CITY_UNKNOWN_ERROR, '조회하려는 여행지가 없습니다.', {
-      statusCode: 404,
-    });
-  }
-
-  const posts = await postService.getAllPostsByDestination(city);
 
   return res.status(200).json({ posts });
 }

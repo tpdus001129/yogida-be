@@ -12,6 +12,7 @@ const commonError = Object.seal({
 
   TAG_UNKNOWN_ERROR: 'Tag Unknown Error',
   TAG_COUNT_ERROR: 'Tag Count Error',
+  SORT_TAG_UNKNOWN_ERROR: 'Sort Tag Unknown Error',
   SEARCHED_CITY_UNKNOWN_ERROR: 'Searched City Unknown Error',
 
   SCHEDULE_UNKNOWN_ERROR: 'Schedule Unknown Error',
