@@ -35,8 +35,6 @@ const postSchema = new Schema(
     cost: { type: Number, required: true },
     // 여행 인원수
     peopleCount: { type: Number, required: true },
-    // 찜 갯수
-    likeCount: { type: Number, default: 0 },
     // 게시글 공개 or 비공개 유무
     isPublic: {
       type: Boolean,

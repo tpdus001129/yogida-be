@@ -8,7 +8,7 @@ export async function getPosts(req, res) {
   let posts = [];
 
   // 전체 조회
-  if (Object.keys(filter).length === 0 || !postId) {
+  if (Object.keys(filter).length === 0) {
     const allPosts = await postService.getAllPosts();
     posts.push(...allPosts);
   }
