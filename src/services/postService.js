@@ -98,7 +98,7 @@ export async function getPostsBySort(sort, posts) {
   if (sort === '최신순') {
     return posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   } else if (sort === '오래된순') {
-    return [...posts].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    return posts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
   } else {
     //찜많은순으로 정렬
   }
@@ -134,7 +134,6 @@ export async function createPost(
     peopleCount,
     isPublic,
     reviewText,
-    likeCount: 0,
   });
 
   return createdPost;
