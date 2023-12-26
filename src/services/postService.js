@@ -1,24 +1,104 @@
+import commonError from '../constants/errorConstant.js';
+import CustomError from '../middleware/errorHandler.js';
 import Post from '../models/schemas/Post.js';
+import {
+  checkPost,
+  checkUserId,
+  checkTagListHasTag,
+  checkCityListHasCity,
+  checkSortListHasSort,
+  checkScheduleLengthAndDay,
+  checkSchedulePlaceAndDistances,
+  getCommonAggregate,
+} from '../utils/post.js';
 
-// 모든 게시글 조회
+/// 모든 게시글 조회
 export async function getAllPosts() {
-  try {
-    return await Post.find({});
-  } catch (err) {
-    throw new Error(err.message);
-  }
+  const posts = await Post.aggregate(getCommonAggregate()).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
+
+  return posts;
 }
 
 // 특정 게시글 조회
-export async function getPostByPostId(postId) {
-  try {
-    const post = await Post.findOne({ postId });
+export async function getPostById(postId) {
+  return await Post.findOne({ _id: postId })
+    .populate({ path: 'authorId', select: '_id nickname' })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+}
 
-    if (!post || post.length === 0) {
-      throw new Error('게시글이 없습니다.');
-    }
-  } catch (err) {
-    throw new Error(err.message);
+//특정 사용자의 게시글 조회
+export async function getAllPostsByUserId(userId) {
+  return await Post.find({ authorId: userId })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+}
+
+// 태그 필터링된 게시글 조회
+export async function getAllPostsByTags(tags) {
+  // 배열인지 검사
+  if (!Array.isArray(tags)) {
+    throw new CustomError(commonError.POST_TYPE_ERROR, '올바른 요청 값이 아닙니다.', {
+      statusCode: 400,
+    });
+  }
+
+  if (tags.length > 5) {
+    throw new CustomError(commonError.TAG_COUNT_ERROR, '태그는 최대 5개까지 선택 가능합니다.', {
+      statusCode: 400,
+    });
+  }
+
+  // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
+  checkTagListHasTag(tags);
+
+  // 전체 게시글에서 해당 태그가 있는 게시글만 반환
+  return await Post.aggregate([...getCommonAggregate(), { $match: { tag: { $in: tags } } }]).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
+}
+
+// 검색된 여행지로 게시글 조회
+export async function getAllPostsByDestination(city) {
+  checkCityListHasCity(city);
+
+  return await Post.aggregate([...getCommonAggregate(), { $match: { destination: city } }]).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
+}
+
+export async function getPostsBySort(sort, posts) {
+  // 사용자가 선택한 정렬 기준이 기존에 제공된 기준인지 검사
+  checkSortListHasSort(sort);
+
+  if (sort === '최신순') {
+    return posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sort === '오래된순') {
+    return posts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  } else {
+    //찜많은순으로 정렬
+    return posts.sort((a, b) => b.likeCount - a.likeCount);
   }
 }
 
@@ -27,45 +107,34 @@ export async function createPost(
   userId,
   { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
 ) {
-  // 여행일정과 관련된 변수 설정
-  const singleScheduleLength = schedules.length;
+  // 사용자가 선택한 태그들이 기존에 제공된 태그인지 검사
+  checkTagListHasTag(tag);
 
-  // 세부 장소와 거리에 관련된 변수 설정
-  const singleSchedulePlaceCounts = schedules.map((location) => location.length - 1);
-  const distancesCounts = distances.map((distance) => distance.length);
+  // 사용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
+  checkCityListHasCity(destination);
 
-  // 여행일정 수 계산 (5월 30일 ~ 6월 2일이여도 계산 가능)
-  const dtMs = endDate.getTime() - startDate.getTime();
-  console.log(dtMs);
-  const travelDays = dtMs / (1000 * 60 * 60 * 24);
+  // 여행일정과 디데일 일치한지 검사
+  checkScheduleLengthAndDay(schedules, startDate, endDate);
 
-  // 등록된 여행 날짜와 디데이 불일치 또는 세부 장소와 거리 갯수 불일치 시 오류 반환
-  // 오류 메시지를 각각 다르게 정확한 이유로 넘겨야할지, 묶어서 오류 메시지를 넘길지 고민
-  if (singleScheduleLength !== travelDays) {
-    throw new Error('등록된 여행 날짜와 여행 일정 수가 일치하지 않습니다.');
-  }
+  // 세부 장소와 거리 수가 일치한지 검사
+  checkSchedulePlaceAndDistances(schedules, distances);
 
-  if (singleSchedulePlaceCounts.length !== distancesCounts.length) {
-    throw new Error('등록된 여행 장소 갯수와 거리 갯수가 일치하지 않습니다.');
-  }
+  const createdPost = await Post.create({
+    authorId: userId,
+    title,
+    destination,
+    startDate,
+    endDate,
+    tag,
+    schedules,
+    distances,
+    cost,
+    peopleCount,
+    isPublic,
+    reviewText,
+  });
 
-  try {
-    await Post.create(userId, {
-      title,
-      destination,
-      startDate,
-      endDate,
-      tag,
-      schedules,
-      distances,
-      cost,
-      peopleCount,
-      isPublic,
-      reviewText,
-    });
-  } catch (err) {
-    throw new Error(err.message);
-  }
+  return createdPost;
 }
 
 // 특정 사용자의 게시글 수정 (해당 사용자가 수정하는게 맞는지 확인 필수)
@@ -74,19 +143,36 @@ export async function updatePost(
   postId,
   { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
 ) {
-  const post = await Post.findById(postId).populate('authorId').lean();
+  const post = await Post.findOne({ _id: postId })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
 
-  if (!post) {
-    throw new Error('해당 게시글을 찾을 수 없습니다.');
-  }
+  // post가 있는지 확인
+  checkPost(post);
 
   // 작성자와 수정하려는 사용자가 일치한지
-  if (post.authorId !== userId) {
-    throw new Error('게시글을 수정할 권한이 없습니다.');
-  }
+  checkUserId(post, userId);
 
-  try {
-    const updatedPost = await Post.updateOne(postId, {
+  // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
+  checkTagListHasTag(tag);
+
+  // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
+  checkCityListHasCity(destination);
+
+  // 여행일정과 디데일 일치한지 검사
+  checkScheduleLengthAndDay(schedules, startDate, endDate);
+
+  // 세부 장소와 거리 수가 일치한지 검사
+  checkSchedulePlaceAndDistances(schedules, distances);
+
+  const updatedPost = await Post.updateOne(
+    { _id: postId },
+    {
       title,
       destination,
       startDate,
@@ -98,35 +184,41 @@ export async function updatePost(
       peopleCount,
       isPublic,
       reviewText,
+    },
+  ).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
     });
-
-    if (updatedPost.modifiedCount === 0) {
-      throw new Error('게시글 수정을 실패하였습니다.');
-    }
-  } catch (err) {
-    throw new Error(err.message);
+  });
+  if (updatedPost.modifiedCount === 0) {
+    throw new CustomError(commonError.POST_MODIFY_ERROR, '게시글 수정을 실패하였습니다.', { statusCode: 404 });
   }
+
+  return updatedPost;
 }
 
 // 특정 사용자의 게시글 삭제
 export async function deletePost(userId, postId) {
-  const post = await Post.findById(postId).populate('authorId').lean();
+  const post = await Post.findOne({ _id: postId })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
 
-  if (!post) {
-    throw new Error('게시글을 찾을 수 없습니다.');
-  }
+  // post가 있는지 확인
+  checkPost(post);
 
-  if (post.authorId !== userId) {
-    throw new Error('게시글을 삭제할 권한이 없습니다.');
-  }
+  // 작성자와 수정하려는 사용자가 일치한지
+  checkUserId(userId);
 
-  try {
-    const deletedPost = await Post.deleteOne(postId);
-
-    if (!deletedPost) {
-      throw new Error('게시글을 찾을 수 없습니다.');
-    }
-  } catch (err) {
-    throw new Error(err.message);
-  }
+  return await Post.deleteOne({ _id: postId }).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
 }

@@ -2,6 +2,8 @@ import express from 'express';
 import * as authController from '../../controllers/authController.js';
 import asyncHandler from '../../middleware/asyncHandler.js';
 import { isAuth } from '../../middleware/isAuth.js';
+import validator from '../../middleware/validator.js';
+import { authMail, changePassword, checkMail, login, signup } from '../../middleware/validators/auth.js';
 
 const authRouter = express.Router();
 
@@ -15,24 +17,30 @@ authRouter.get('/kakao/redirect', asyncHandler(authController.kakaoAuthRedirectH
 authRouter.get('/kakao/me', asyncHandler(authController.kakaoMe));
 
 // 회원가입
-authRouter.post('/signup', asyncHandler(authController.signup));
+authRouter.post('/signup', validator(signup), asyncHandler(authController.signup));
 
 // 인증 메일 보내기
-authRouter.post('/signup/auth-mail', asyncHandler(authController.authEmail));
+authRouter.post('/signup/auth-mail', validator(authMail), asyncHandler(authController.sendAuthEmail));
 
 // 인증 번호 확인
-authRouter.post('/signup/check-mail', asyncHandler(authController.checkEmailCode));
+authRouter.post('/signup/check-mail', validator(checkMail), asyncHandler(authController.checkEmailCode));
 
 // 로그인
-authRouter.post('/login', asyncHandler(authController.login));
+authRouter.post('/login', validator(login), asyncHandler(authController.login));
 
 // 비밀번호 변경
-authRouter.post('/change-password', isAuth, asyncHandler(authController.changePassword));
+authRouter.post('/change-password', isAuth, validator(changePassword), asyncHandler(authController.changePassword));
 
 // 로그인 아웃
-// authRouter.post('/logout', authController.logout);
+authRouter.post('/logout', isAuth, asyncHandler(authController.logout));
 
 // 로그인 상태 체크
 authRouter.get('/me', isAuth, asyncHandler(authController.me));
+
+// 카카오 탈퇴
+authRouter.post('/kakao/unlink', isAuth, asyncHandler(authController.kakaoUnlink));
+
+// 이메일 탈퇴
+authRouter.delete('/withdraw', isAuth, asyncHandler(authController.withdraw));
 
 export default authRouter;
