@@ -15,7 +15,13 @@ export async function getUserById(req, res) {
 // 자기 자신 정보 수정
 export async function updateUser(req, res) {
   const userId = req.userId;
-  const { nickname, profileImageSrc } = req.body;
+  const { nickname } = req.body;
+  let profileImageSrc;
+
+  // 업로드 성공했을때
+  if (req.file) {
+    profileImageSrc = `/images/${req.file.filename}`;
+  }
 
   const user = await userService.updateUser({ userId, nickname, profileImageSrc });
 
