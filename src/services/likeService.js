@@ -42,7 +42,12 @@ export async function createLike(userId, postId) {
 }
 
 // 3. 찜 삭제
-export async function deleteAllLikes(userId, bodyData) {
-  const deletedLike = await Like.deleteMany({ _id: { $in: bodyData }, userId });
+export async function deleteAllLikes(userId, postId) {
+  const deletedLike = await Like.deleteMany({ userId, postId }).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
   return deletedLike;
 }

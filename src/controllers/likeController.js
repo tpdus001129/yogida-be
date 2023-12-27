@@ -34,8 +34,8 @@ export async function createLike(req, res) {
 // 3. 찜 삭제
 export async function deleteAllLikes(req, res) {
   const userId = req.userId;
-  const bodyData = req.body;
-  const deletedLike = await likeService.deleteAllLikes(userId, bodyData);
+  const postId = req.body.postId;
+  const deletedLike = await likeService.deleteAllLikes(userId, postId);
 
   if (!deletedLike) {
     throw new CustomError(commonError.LIKE_UNKNOWN_ERROR, '찜을 찾을 수 없습니다.', {
