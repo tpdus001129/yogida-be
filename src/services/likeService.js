@@ -21,6 +21,17 @@ export async function getAllLikedPosts(userId) {
 
 // 2. 특정 게시물에 찜하기
 export async function createLike(userId, postId) {
+  const findLike = await Like.findOne({
+    userId: userId,
+    postId: postId,
+  }).lean();
+
+  if (findLike) {
+    throw new CustomError(commonError.LIKE_DELETE_ERROR, '이미 찜에 추가되어있습니다.', {
+      statusCode: 409,
+    });
+  }
+
   const createdLike = await Like.create({ userId, postId }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
@@ -32,36 +43,6 @@ export async function createLike(userId, postId) {
 
 // 3. 찜 삭제
 export async function deleteAllLikes(userId, bodyData) {
-  // const user = Array.isArray(bodyData) ? bodyData.map((item) => item.userId) : [bodyData.userId];
-  // const post = Array.isArray(bodyData) ? bodyData.map((item) => item.postId) : [bodyData.postId];
-
-  // if (!user || post === 0) {
-  //   throw new CustomError(commonError.LIKE_UNKNOWN_ERROR, '찜을 찾을 수 없습니다.', {
-  //     statusCode: 404,
-  //   });
-  // }
-
-  // const userMap = new Map();
-  // user.forEach((userId) => {
-  //   userMap.set(userId.toString(), true);
-  // });
-
-  // if (!userMap.has(userId.toString())) {
-  //   throw new CustomError(commonError.USER_MATCH_ERROR, '찜을 삭제할 권한이 없습니다.', {
-  //     statusCode: 403,
-  //   });
-  // }
-
-  // let deletedLike;
-  // for (let i = 0; i < user.length; i++) {
-  //   deletedLike = await Like.deleteMany({ userId: user[i], postId: post[i] }).catch((error) => {
-  //     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-  //       statusCode: 500,
-  //       cause: error,
-  //     });
-  //   });
-  // }
-
   const deletedLike = await Like.deleteMany({ _id: { $in: bodyData }, userId });
   return deletedLike;
 }
