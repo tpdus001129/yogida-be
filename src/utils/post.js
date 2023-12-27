@@ -163,7 +163,7 @@ export function getCommonAggregate() {
         cost: 1,
         peopleCount: 1,
         likeCount: { $size: '$likes' },
-        CommentCount: { $add: [{ $size: '$comments' }, { $size: '$replies' }] },
+        commentCount: { $add: [{ $size: '$comments' }, { $size: '$replies' }] },
         isPublic: 1,
         reviewText: 1,
         createdAt: 1,
