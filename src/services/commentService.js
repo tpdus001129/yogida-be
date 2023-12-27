@@ -5,18 +5,30 @@ import Reply from '../models/schemas/Reply.js';
 
 // 1. 마이페이지에서 내가 썼던 댓글 조회
 export async function getAllCommentsByUserId(userId) {
-  const comments = await Comment.find({ authorId: userId }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
+  const comments = await Comment.find({ authorId: userId })
+    .populate({
+      path: 'authorId',
+      model: 'User',
+      select: 'nickname profileImageSrc',
+    })
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
     });
-  });
-  const replies = await Reply.find({ authorId: userId }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
+  const replies = await Reply.find({ authorId: userId })
+    .populate({
+      path: 'authorId',
+      model: 'User',
+      select: 'nickname profileImageSrc',
+    })
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
     });
-  });
 
   const myComments = [...comments, ...replies];
   myComments.sort((a, b) => a.createdAt - b.createdAt);
@@ -26,6 +38,11 @@ export async function getAllCommentsByUserId(userId) {
 // 2. 게시물에 있는 댓글 조회
 export async function getCommentsByPostId(postId) {
   const comments = await Comment.find({ postId })
+    .populate({
+      path: 'authorId',
+      model: 'User',
+      select: 'nickname profileImageSrc',
+    })
     .populate('reply')
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
