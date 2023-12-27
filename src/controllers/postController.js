@@ -5,7 +5,7 @@ import * as postService from '../services/postService.js';
 export async function getPosts(req, res) {
   const filter = req.query;
 
-  let posts = [];
+  const posts = [];
 
   // 전체 조회
   if (Object.keys(filter).length === 0 || !filter.tag) {
@@ -37,9 +37,8 @@ export async function getPosts(req, res) {
     }
 
     const sortedPosts = await postService.getPostsBySort(sort, posts);
-    posts = sortedPosts;
+    return res.status(200).json({ posts: sortedPosts });
   }
-
   return res.status(200).json({ posts });
 }
 

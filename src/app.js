@@ -9,6 +9,8 @@ const app = express();
 
 connectDB();
 
+app.use('/images', express.static('src/images'));
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
