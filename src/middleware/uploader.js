@@ -1,13 +1,28 @@
+import Joi from 'joi';
 import multer from 'multer';
+import path from 'path';
+import CustomError from './errorHandler.js';
+
+const formDataSchema = Joi.object({
+  nickname: Joi.string().min(2).optional(),
+});
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'src/images/');
   },
   filename: function (req, file, cb) {
-    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    // const ext = path.extname(file.originalname); // 파일의 확장자
-    cb(null, file.originalname);
+    // 기본적으로 body 유효성 검사.
+    const validateResult = formDataSchema.validate(req.body);
+
+    if (validateResult.error) {
+      cb(new CustomError('Multer Error', '유효한 데이터 형식이 아닙니다.', { statusCode: 400 }));
+      return;
+    }
+
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + uniqueSuffix + ext);
   },
 });
 

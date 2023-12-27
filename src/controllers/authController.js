@@ -117,9 +117,6 @@ export async function logout(req, res) {
 
 // 로그인 상태 체크
 export async function me(req, res) {
-  console.log(req.user);
-  console.log(req.userId);
-
   return res.status(200).json({ user: req.user, userId: req.userId });
 }
 

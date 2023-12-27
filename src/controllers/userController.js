@@ -15,23 +15,17 @@ export async function getUserById(req, res) {
 // 자기 자신 정보 수정
 export async function updateUser(req, res) {
   const userId = req.userId;
-  const { nickname, profileImageSrc } = req.body;
+  const { nickname } = req.body;
+  let profileImageSrc;
 
-  console.log('이미지 받아오기');
-  console.log(req.file);
+  // 업로드 성공했을때
+  if (req.file) {
+    profileImageSrc = `/images/${req.file.filename}`;
+  }
 
   const user = await userService.updateUser({ userId, nickname, profileImageSrc });
 
   return res.status(200).json({ message: '수정완료', user });
-}
-
-// 유저 생성
-export async function postUser(req, res) {
-  console.log('이미지 받아오기');
-  console.log(req.file);
-  console.log(req.files);
-
-  return res.status(200).json({ message: '응답옴' });
 }
 
 // 닉네임 중복 확인
