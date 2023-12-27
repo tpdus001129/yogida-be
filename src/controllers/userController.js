@@ -17,9 +17,21 @@ export async function updateUser(req, res) {
   const userId = req.userId;
   const { nickname, profileImageSrc } = req.body;
 
+  console.log('이미지 받아오기');
+  console.log(req.file);
+
   const user = await userService.updateUser({ userId, nickname, profileImageSrc });
 
   return res.status(200).json({ message: '수정완료', user });
+}
+
+// 유저 생성
+export async function postUser(req, res) {
+  console.log('이미지 받아오기');
+  console.log(req.file);
+  console.log(req.files);
+
+  return res.status(200).json({ message: '응답옴' });
 }
 
 // 닉네임 중복 확인
