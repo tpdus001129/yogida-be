@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import config from './config/config.js';
 import v1Router from './routers/index.js';
@@ -9,14 +10,14 @@ const app = express();
 
 connectDB();
 
-// if (process.env.NODE_ENV === 'development') {
-//   const corsConfig = {
-//     origin: 'http://localhost:5173',
-//     credentials: true,
-//   };
+if (process.env.NODE_ENV === 'development') {
+  const corsConfig = {
+    origin: 'http://localhost:5173',
+    credentials: true,
+  };
 
-//   app.use(cors(corsConfig));
-// }
+  app.use(cors(corsConfig));
+}
 
 app.use(express.json());
 app.use(cookieParser());
