@@ -111,18 +111,20 @@ export async function changePassword(email, password) {
 }
 
 // 인증 번호 이메일 전송하기
-export async function sendAuthenticationEmail(email) {
+export async function sendAuthenticationEmail(email, type) {
   if (email === '') {
     throw new CustomError(commonError.AUTHENTICATION_ERROR, `이메일을 입력해주세요.`, { statusCode: 400 });
   }
   let isOver = false;
 
-  //이미 가입된 이메일이 있는지 확인
-  const isEmailSaved = await User.findOne({ email });
+  if (type === 'signup') {
+    //이미 가입된 이메일이 있는지 확인
+    const isEmailSaved = await User.findOne({ email });
 
-  //이미 DB에 이메일이 있다면
-  if (isEmailSaved) {
-    throw new CustomError(commonError.AUTHENTICATION_ERROR, '이미 등록되어 있는 이메일입니다.', { statusCode: 409 });
+    //이미 DB에 이메일이 있다면
+    if (isEmailSaved) {
+      throw new CustomError(commonError.AUTHENTICATION_ERROR, '이미 등록되어 있는 이메일입니다.', { statusCode: 409 });
+    }
   }
 
   //이미 인증db에 정보가 있는지 확인

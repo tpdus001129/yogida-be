@@ -64,7 +64,8 @@ export async function signup(req, res) {
 
 // 유저에게 인증메일 보내기
 export async function sendAuthEmail(req, res) {
-  await authService.sendAuthenticationEmail(req.body.email);
+  const { email, type } = req.body;
+  await authService.sendAuthenticationEmail(email, type);
   return res.status(200).json({ message: '전송 완료' });
 }
 
@@ -72,7 +73,11 @@ export async function sendAuthEmail(req, res) {
 export async function checkEmailCode(req, res) {
   const { email, authCode } = req.body;
   await authService.checkEmailCode({ email, authCode });
-
+  // 인증에 성공하면 토큰을 발급
+  const token = createToken(email, null, 300_000);
+  res.cookie('token', token, {
+    httpOnly: true,
+  });
   return res.status(200).json({ message: '인증번호 일치' });
 }
 
@@ -99,7 +104,7 @@ export async function changePassword(req, res) {
   if (user._id.toString() !== userId.toString()) {
     throw new CustomError('Password Change Error', '다른 유저의 비밀번호는 변경 할 수 없습니다.', { statusCode: 403 });
   }
-
+  res.clearCookie('token');
   await authService.changePassword(email, password);
   return res.status(200).json({ message: '변경 완료' });
 }

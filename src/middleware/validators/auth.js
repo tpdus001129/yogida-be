@@ -45,6 +45,16 @@ export const authMail = Joi.object({
           }),
       )
       .required(),
+    type: Joi.string()
+      .valid('signup', 'change-password')
+      .error(
+        (err) =>
+          new CustomError(commonError.VALIDATION_ERROR, '타입을 확인해주세요.', {
+            statusCode: 400,
+            cause: err,
+          }),
+      )
+      .required(),
   }),
   query: Joi.object(),
   params: Joi.object(),
