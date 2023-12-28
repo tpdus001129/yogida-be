@@ -90,7 +90,7 @@ export async function createPost(req, res) {
 
     if (scheduleRow && scheduleRow[indices[1]]) {
       // schedules의 해당 인덱스에 있는 객체의 placeImageSrc에 file.path를 할당합니다.
-      scheduleRow[indices[1]].placeImageSrc = file.path;
+      scheduleRow[indices[1]].placeImageSrc = `/images/${file.filename}`;
     }
   });
 
