@@ -19,6 +19,7 @@ export async function getAllBookmarksByUserId(userId) {
   const bookmarksWithObjectId = bookmarks.map((bookmark) => {
     return {
       ...bookmark,
+      postId: bookmark.postId,
       bookmarkId: bookmark._id,
     };
   });
@@ -29,7 +30,7 @@ export async function getAllBookmarksByUserId(userId) {
   const selectedSchedule = bookmarksWithObjectId.flatMap((bookmark) => {
     const allSchedules = bookmark.postId.schedules.flat();
     const matchingSchedule = allSchedules.find((schedule) => singleScheduleIds.some((id) => id.equals(schedule._id)));
-    return matchingSchedule ? { ...matchingSchedule, bookmarkId: bookmark.bookmarkId } : [];
+    return matchingSchedule ? { ...matchingSchedule, postId: bookmark.postId, bookmarkId: bookmark.bookmarkId } : [];
   });
 
   return selectedSchedule;
