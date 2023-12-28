@@ -6,7 +6,7 @@ const sortList = new Map(['최신순', '오래된순', '찜많은순'].map((sort
 
 const tagList = new Map(
   [
-    '체험·엑티비티',
+    '체험·액티비티',
     'SNS 핫플레이스',
     '자연적인',
     '유명 관광지',
