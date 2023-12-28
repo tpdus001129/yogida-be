@@ -33,6 +33,7 @@ export async function getAllBookmarksByUserId(userId) {
     return matchingSchedule ? { ...matchingSchedule, postId: bookmark.postId, bookmarkId: bookmark.bookmarkId } : [];
   });
 
+  selectedSchedule.sort((a, b) => b.createdAt - a.createdAt);
   return selectedSchedule;
 }
 

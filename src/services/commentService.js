@@ -51,6 +51,7 @@ export async function getCommentsByPostId(postId) {
       });
     });
 
+  comments.sort((a, b) => b.createdAt - a.createdAt);
   return comments;
 }
 

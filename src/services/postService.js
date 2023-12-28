@@ -39,7 +39,7 @@ export async function getPostById(postId) {
 
 //특정 사용자의 게시글 조회
 export async function getAllPostsByUserId(userId) {
-  return await Post.find({ authorId: userId })
+  const posts = await Post.find({ authorId: userId })
     .lean()
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
@@ -47,6 +47,9 @@ export async function getAllPostsByUserId(userId) {
         cause: error,
       });
     });
+
+  posts.sort((a, b) => b.createdAt - a.createdAt);
+  return posts;
 }
 
 // 태그 필터링된 게시글 조회
