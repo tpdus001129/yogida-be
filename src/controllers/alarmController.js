@@ -4,8 +4,9 @@ import * as alarmService from '../services/alarmService.js';
 
 // 특정 유저의 모든 알람 보기.
 export async function getAllAlarms(req, res) {
+  const { perPage, lastItemId } = req.query;
   const userId = req.userId;
-  const alarms = await alarmService.getAllAlarms(userId);
+  const alarms = await alarmService.getAllAlarms(userId, parseInt(perPage), lastItemId);
 
   return res.status(200).json({ message: '알람 요청 성공', alarms });
 }
