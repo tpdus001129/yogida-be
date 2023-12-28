@@ -16,6 +16,8 @@ export async function getAllLikedPosts(userId) {
         cause: error,
       });
     });
+
+  likePostIds.sort((a, b) => b.postId.createdAt - a.postId.createdAt);
   return likePostIds;
 }
 

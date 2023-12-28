@@ -7,9 +7,9 @@ import Reply from '../models/schemas/Reply.js';
 export async function getAllCommentsByUserId(userId) {
   const comments = await Comment.find({ authorId: userId })
     .populate({
-      path: 'authorId',
-      model: 'User',
-      select: 'nickname profileImageSrc',
+      path: 'postId',
+      model: 'Post',
+      select: 'schedules.placeImageSrc',
     })
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
@@ -19,9 +19,9 @@ export async function getAllCommentsByUserId(userId) {
     });
   const replies = await Reply.find({ authorId: userId })
     .populate({
-      path: 'authorId',
-      model: 'User',
-      select: 'nickname profileImageSrc',
+      path: 'postId',
+      model: 'Post',
+      select: 'schedules.placeImageSrc',
     })
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
@@ -31,7 +31,7 @@ export async function getAllCommentsByUserId(userId) {
     });
 
   const myComments = [...comments, ...replies];
-  myComments.sort((a, b) => a.createdAt - b.createdAt);
+  myComments.sort((a, b) => b.createdAt - a.createdAt);
   return myComments;
 }
 
@@ -51,6 +51,7 @@ export async function getCommentsByPostId(postId) {
       });
     });
 
+  comments.sort((a, b) => b.createdAt - a.createdAt);
   return comments;
 }
 

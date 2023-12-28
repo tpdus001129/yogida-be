@@ -1,22 +1,27 @@
 import mongoose, { Schema } from 'mongoose';
 
-const bookmarkSchema = new Schema({
-  authorId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+const bookmarkSchema = new Schema(
+  {
+    authorId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    postId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Post',
+      required: true,
+    },
+    singleScheduleId: {
+      type: Schema.Types.ObjectId,
+      ref: 'SingleSchedule',
+      required: true,
+    },
   },
-  postId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Post',
-    required: true,
+  {
+    timestamps: true,
   },
-  singleScheduleId: {
-    type: Schema.Types.ObjectId,
-    ref: 'SingleSchedule',
-    required: true,
-  },
-});
+);
 
 const Bookmark = mongoose.model('Bookmark', bookmarkSchema);
 export default Bookmark;

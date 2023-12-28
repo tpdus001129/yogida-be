@@ -39,7 +39,7 @@ export async function getPostById(postId) {
 
 //특정 사용자의 게시글 조회
 export async function getAllPostsByUserId(userId) {
-  return await Post.find({ authorId: userId })
+  const posts = await Post.find({ authorId: userId })
     .lean()
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
@@ -47,6 +47,9 @@ export async function getAllPostsByUserId(userId) {
         cause: error,
       });
     });
+
+  posts.sort((a, b) => b.createdAt - a.createdAt);
+  return posts;
 }
 
 // 태그 필터링된 게시글 조회
@@ -113,8 +116,8 @@ export async function createPost(
   // 사용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
   checkCityListHasCity(destination);
 
-  // 여행일정과 디데일 일치한지 검사
-  checkScheduleLengthAndDay(schedules, startDate, endDate);
+  // // 여행일정과 디데일 일치한지 검사
+  // checkScheduleLengthAndDay(schedules, startDate, endDate);
 
   // 세부 장소와 거리 수가 일치한지 검사
   checkSchedulePlaceAndDistances(schedules, distances);
@@ -132,6 +135,11 @@ export async function createPost(
     peopleCount,
     isPublic,
     reviewText,
+  }).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
   });
 
   return createdPost;

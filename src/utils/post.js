@@ -170,5 +170,10 @@ export function getCommonAggregate() {
         updatedAt: 1,
       },
     },
+    {
+      $sort: {
+        createdAt: -1, // -1 for descending order, 1 for ascending order
+      },
+    },
   ];
 }

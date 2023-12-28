@@ -76,34 +76,37 @@ export async function getAllPostsByUserId(req, res) {
 export async function createPost(req, res) {
   const userId = req.userId;
 
-  if (!userId) {
-    throw new CustomError(commonError.USER_UNKNOWN_ERROR, '추가하려는 특정 사용자를 찾을 수 없습니다.', {
-      statusCode: 404,
-    });
-  }
+  const body = JSON.parse(req.body.payload);
 
   const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
-    req.body;
+    body;
 
-  const result = await postService.createPost(userId, {
+  let newSchedules = schedules.map((schedule) => schedule);
+
+  req.files.forEach((file) => {
+    // '1-1'을 [1, 1] 형태로 변환합니다.
+    const indices = file.originalname.split('-').map((num) => parseInt(num, 10) - 1);
+    const scheduleRow = newSchedules[indices[0]];
+
+    if (scheduleRow && scheduleRow[indices[1]]) {
+      // schedules의 해당 인덱스에 있는 객체의 placeImageSrc에 file.path를 할당합니다.
+      scheduleRow[indices[1]].placeImageSrc = `/images/${file.filename}`;
+    }
+  });
+
+  await postService.createPost(userId, {
     title,
     destination,
     startDate,
     endDate,
     tag,
-    schedules,
+    schedules: newSchedules,
     distances,
-    cost,
-    peopleCount,
+    cost: parseInt(cost),
+    peopleCount: parseInt(peopleCount),
     isPublic,
     reviewText,
   });
-
-  if (!result) {
-    throw new CustomError(commonError.POST_UNKNOWN_ERROR, '이미 같은 ID로 게시글이 등록되어 있습니다.', {
-      statusCode: 404,
-    });
-  }
 
   return res.status(201).json({ message: '게시글이 등록되었습니다.' });
 }
