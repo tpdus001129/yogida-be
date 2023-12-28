@@ -4,7 +4,7 @@ const singleSchedule = new Schema({
   // 장소
   placeName: { type: String, required: true },
   // 이미지
-  placeImageSrc: { type: String, required: true },
+  placeImageSrc: { type: String, default: 'default' },
   // 별점
   star: { type: Number, required: true },
   // 카테고리
@@ -28,7 +28,7 @@ const postSchema = new Schema(
     // 게시글 태그들
     tag: { type: [String] },
     // 여행 세부 장소들
-    schedules: { type: [[singleSchedule]], required: true },
+    schedules: { type: [[singleSchedule]] },
     // 세부 장소들 사이 거리
     distances: { type: [[Number]], required: true },
     // 여행 경비
