@@ -31,7 +31,7 @@ export async function getAllCommentsByUserId(userId) {
     });
 
   const myComments = [...comments, ...replies];
-  myComments.sort((a, b) => a.createdAt - b.createdAt);
+  myComments.sort((a, b) => b.createdAt - a.createdAt);
   return myComments;
 }
 
