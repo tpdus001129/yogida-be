@@ -3,15 +3,16 @@ import CustomError from '../middleware/errorHandler.js';
 import * as postService from '../services/postService.js';
 
 export async function getPosts(req, res) {
+  const post = await postService.getAllPosts();
+
+  return res.status(200).json({ post });
+}
+
+// 필터 게시글 조회
+export async function getAllPostsByFilter(req, res) {
   const filter = req.query;
 
   const posts = [];
-
-  // 전체 조회
-  if (Object.keys(filter).length === 0 || !filter.tag) {
-    const allPosts = await postService.getAllPosts();
-    posts.push(...allPosts);
-  }
 
   // 여행지로 조회
   if (filter.city) {
@@ -39,6 +40,7 @@ export async function getPosts(req, res) {
     const sortedPosts = await postService.getPostsBySort(sort, posts);
     return res.status(200).json({ posts: sortedPosts });
   }
+
   return res.status(200).json({ posts });
 }
 
@@ -54,7 +56,7 @@ export async function getPostById(req, res) {
 
   const post = await postService.getPostById(postId);
 
-  return res.status(200).json(post);
+  return res.status(200).json({ post });
 }
 
 // 특정 사용자의 게시글 조회
