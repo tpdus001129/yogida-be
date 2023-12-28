@@ -45,9 +45,70 @@ export async function kakaoAuthRedirectHandler(req, res) {
 // 회원가입
 export async function signup(req, res) {
   const { snsId, email, password, nickname, profileImageUrl, type } = req.body;
+  if (typeof snsId !== 'undefined' && typeof snsId !== 'string') {
+    return new CustomError(commonError.VALIDATION_ERROR, '올바른 아이디 형식이 아닙니다.', {
+      statusCode: 400,
+    });
+  }
+
+  if (typeof email !== 'undefined') {
+    if (typeof email !== 'string') {
+      return new CustomError(commonError.VALIDATION_ERROR, '올바른 이메일 형식이 아닙니다.', {
+        statusCode: 400,
+      });
+    }
+
+    if (!/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.exec(email)) {
+      return new CustomError(commonError.VALIDATION_ERROR, '올바른 이메일 형식이 아닙니다.', {
+        statusCode: 400,
+      });
+    }
+  } else {
+    return new CustomError(commonError.VALIDATION_ERROR, '올바른 이메일 형식이 아닙니다.', {
+      statusCode: 400,
+    });
+  }
+
+  if (typeof password !== 'undefined') {
+    if (typeof password !== 'string') {
+      return new CustomError(commonError.VALIDATION_ERROR, '비밀번호 형식이 올바르지 않습니다.', {
+        statusCode: 400,
+      });
+    }
+
+    if (password.length < 8 || !/^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_])/.exec(password)) {
+      return new CustomError(commonError.VALIDATION_ERROR, '비밀번호 형식이 올바르지 않습니다.', {
+        statusCode: 400,
+      });
+    }
+  }
+
+  if (typeof nickname === 'undefined' || typeof nickname !== 'string') {
+    return new CustomError(commonError.VALIDATION_ERROR, '닉네임 형식이 올바르지 않습니다.', {
+      statusCode: 400,
+    });
+  }
+
+  if (typeof profileImageUrl !== 'undefined' && typeof profileImageUrl !== 'string') {
+    return new CustomError(commonError.VALIDATION_ERROR, '프로필 경로 형식이 올바르지 않습니다.', {
+      statusCode: 400,
+    });
+  }
+
+  if (typeof type !== 'undefined' && typeof type !== 'string') {
+    return new CustomError(commonError.VALIDATION_ERROR, '타입 형식이 올바르지 않습니다.', {
+      statusCode: 400,
+    });
+  }
   let token;
+  let profileImageSrc;
   if (type === 'kakao') {
-    token = await authService.snsSignup(snsId, email, nickname, profileImageUrl);
+    if (req.file) {
+      profileImageSrc = `/images/${req.file.filename}`;
+    } else {
+      profileImageSrc = profileImageUrl;
+    }
+    token = await authService.snsSignup(snsId, email, nickname, profileImageSrc);
   } else {
     token = await authService.signup(email, password, nickname);
   }

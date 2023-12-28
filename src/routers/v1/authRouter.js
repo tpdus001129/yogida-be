@@ -3,7 +3,8 @@ import * as authController from '../../controllers/authController.js';
 import asyncHandler from '../../middleware/asyncHandler.js';
 import { isAuth } from '../../middleware/isAuth.js';
 import validator from '../../middleware/validator.js';
-import { authMail, changePassword, checkMail, login, signup } from '../../middleware/validators/auth.js';
+import { authMail, changePassword, checkMail, login } from '../../middleware/validators/auth.js';
+import upload from '../../middleware/uploader.js';
 
 const authRouter = express.Router();
 
@@ -17,7 +18,7 @@ authRouter.get('/kakao/redirect', asyncHandler(authController.kakaoAuthRedirectH
 authRouter.get('/kakao/me', asyncHandler(authController.kakaoMe));
 
 // 회원가입
-authRouter.post('/signup', validator(signup), asyncHandler(authController.signup));
+authRouter.post('/signup', upload.single('profile'), asyncHandler(authController.signup));
 
 // 인증 메일 보내기
 authRouter.post('/signup/auth-mail', validator(authMail), asyncHandler(authController.sendAuthEmail));
