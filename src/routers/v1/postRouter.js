@@ -4,6 +4,7 @@ import asyncHandler from '../../middleware/asyncHandler.js';
 import validator from '../../middleware/validator.js';
 import { post } from '../../middleware/validators/post.js';
 import { isAuth } from '../../middleware/isAuth.js';
+import upload from '../../middleware/uploader.js';
 
 const postRouter = express.Router();
 
@@ -17,7 +18,7 @@ postRouter.get('/my-page', isAuth, asyncHandler(postController.getAllPostsByUser
 postRouter.get('/:postId', asyncHandler(postController.getPostById));
 
 // 게시글 생성
-postRouter.post('/', isAuth, validator(post), asyncHandler(postController.createPost));
+postRouter.post('/', isAuth, upload.array('image', 10), asyncHandler(postController.createPost));
 
 // 게시글 수정
 postRouter.put('/:postId', isAuth, validator(post), asyncHandler(postController.updatePost));
