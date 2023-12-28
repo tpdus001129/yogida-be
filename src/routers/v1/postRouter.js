@@ -10,9 +10,6 @@ const postRouter = express.Router();
 // 전체 게시글 조회 (메인페이지)
 postRouter.get('/', asyncHandler(postController.getPosts));
 
-// 필터 게시글 조회
-postRouter.get('/filter', asyncHandler(postController.getAllPostsByFilter));
-
 // 특정 사용자의 전체 게시글 조회
 postRouter.get('/my-page', isAuth, asyncHandler(postController.getAllPostsByUserId));
 
