@@ -9,8 +9,14 @@ export async function getAlarmByAlarmId(alarmId) {
 }
 
 // 특정 유저의 모든 알람 보기.
-export async function getAllAlarms(userId) {
-  return await Alarm.find({ receiverId: userId })
+export async function getAllAlarms(userId, perPage, lastItemId) {
+  const findQuery = { receiverId: userId };
+  if (lastItemId) {
+    findQuery._id = { $lt: lastItemId };
+  }
+  const data = await Alarm.find(findQuery)
+    .sort({ _id: -1 })
+    .limit(perPage)
     .populate({ path: 'senderId', select: '-_id nickname' })
     .catch((err) => {
       throw new CustomError(commonError.DB_ERROR, '알람을 불러오는 중 오류가 생겼습니다.', {
@@ -18,6 +24,7 @@ export async function getAllAlarms(userId) {
         cause: err,
       });
     });
+  return { data, lastItemId: data.length > 0 ? data[data.length - 1]._id : null };
 }
 
 // 특정 알람 삭제하기
