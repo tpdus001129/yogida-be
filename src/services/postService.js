@@ -19,6 +19,11 @@ import {
 export async function getAllPosts() {
   const posts = await Post.aggregate([
     {
+      $match: {
+        isPublic: true, // isPublic이 true인 문서만 선택
+      },
+    },
+    {
       $lookup: {
         from: 'likes',
         localField: '_id',

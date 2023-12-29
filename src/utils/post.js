@@ -133,6 +133,11 @@ export function checkSchedulePlaceAndDistances(schedules, distances) {
 export function getCommonAggregate() {
   return [
     {
+      $match: {
+        isPublic: true, // isPublic이 true인 문서만 선택
+      },
+    },
+    {
       $lookup: {
         from: 'likes',
         localField: '_id',
