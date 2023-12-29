@@ -43,7 +43,14 @@ export async function getCommentsByPostId(postId) {
       model: 'User',
       select: 'nickname profileImageSrc',
     })
-    .populate('reply')
+    .populate({
+      path: 'reply',
+      populate: {
+        path: 'authorId',
+        model: 'User',
+        select: 'nickname profileImageSrc',
+      },
+    })
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
         statusCode: 500,
