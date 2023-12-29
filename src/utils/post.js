@@ -178,7 +178,7 @@ export function getCommonAggregate() {
     },
     {
       $sort: {
-        createdAt: -1, // -1 for descending order, 1 for ascending order
+        createdAt: -1,
       },
     },
   ];

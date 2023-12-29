@@ -260,3 +260,48 @@ export async function deletePost(userId, postId) {
     });
   });
 }
+
+export async function findPostsByDestinationAndTag(destination, tag, sort) {
+  const query = {};
+
+  // 목적지가 주어진 경우 쿼리에 추가
+  if (destination) {
+    query.destination = destination;
+  }
+  // 태그가 주어진 경우, 배열 내 해당 태그가 있는지 확인
+  if (tag) {
+    query.tag = { $in: tag };
+  }
+
+  // aggregate 쿼리 설정
+  let aggregateQuery = [
+    { $match: query },
+    ...getCommonAggregate(), // 여기서 likeCount 등을 계산
+  ];
+
+  // 정렬 조건 추가
+  switch (sort) {
+    case '최신순':
+      aggregateQuery.push({ $sort: { createdAt: -1 } });
+      break;
+    case '오래된순':
+      aggregateQuery.push({ $sort: { createdAt: 1 } });
+      break;
+    case '찜많은순':
+      aggregateQuery.push({ $sort: { likeCount: -1 } });
+      break;
+    default:
+      // 기본 정렬 로직 (예: 최신순)
+      aggregateQuery.push({ $sort: { createdAt: -1 } });
+  }
+
+  // Post 모델을 사용하여 aggregate 쿼리 수행
+  const posts = await Post.aggregate(aggregateQuery).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
+
+  return posts;
+}
