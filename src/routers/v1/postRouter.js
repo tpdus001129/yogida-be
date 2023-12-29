@@ -22,6 +22,6 @@ postRouter.post('/', isAuth, upload.array('image', 10), asyncHandler(postControl
 postRouter.put('/:postId', isAuth, upload.array('image', 10), asyncHandler(postController.updatePost));
 
 // 게시글 삭제
-postRouter.delete('/:postId', asyncHandler(postController.deletePost));
+postRouter.delete('/:postId', isAuth, asyncHandler(postController.deletePost));
 
 export default postRouter;

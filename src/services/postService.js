@@ -1,13 +1,16 @@
 import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 import Post from '../models/schemas/Post.js';
+import Bookmark from '../models/schemas/Bookmark.js';
+import Comment from '../models/schemas/Comment.js';
+import Like from '../models/schemas/Like.js';
 import {
   checkPost,
   checkUserId,
   checkTagListHasTag,
   checkCityListHasCity,
   checkSortListHasSort,
-  checkScheduleLengthAndDay,
+  // checkScheduleLengthAndDay,
   checkSchedulePlaceAndDistances,
   getCommonAggregate,
 } from '../utils/post.js';
@@ -120,7 +123,7 @@ export async function createPost(
   // checkScheduleLengthAndDay(schedules, startDate, endDate);
 
   // 세부 장소와 거리 수가 일치한지 검사
-  checkSchedulePlaceAndDistances(schedules, distances);
+  // checkSchedulePlaceAndDistances(schedules, distances);
 
   const createdPost = await Post.create({
     authorId: userId,
@@ -173,7 +176,7 @@ export async function updatePost(
   checkCityListHasCity(destination);
 
   // 여행일정과 디데일 일치한지 검사
-  checkScheduleLengthAndDay(schedules, startDate, endDate);
+  // checkScheduleLengthAndDay(schedules, startDate, endDate);
 
   // 세부 장소와 거리 수가 일치한지 검사
   checkSchedulePlaceAndDistances(schedules, distances);
@@ -221,7 +224,34 @@ export async function deletePost(userId, postId) {
   checkPost(post);
 
   // 작성자와 수정하려는 사용자가 일치한지
-  checkUserId(userId);
+  checkUserId(post, userId);
+
+  await Comment.deleteMany({ postId: { $in: postId } })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+
+  await Like.deleteMany({ postId: { $in: postId } })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
+
+  await Bookmark.deleteMany({ postId: { $in: postId } })
+    .lean()
+    .catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    });
 
   return await Post.deleteOne({ _id: postId }).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {

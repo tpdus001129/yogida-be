@@ -8,7 +8,7 @@ export async function getPosts(req, res) {
   const posts = [];
 
   // 전체 조회
-  if (Object.keys(filter).length === 0 || !filter.tag) {
+  if (Object.keys(filter).length === 0 || (!filter.tag && !filter.city)) {
     const allPosts = await postService.getAllPosts();
     posts.push(...allPosts);
   }
@@ -101,7 +101,7 @@ export async function createPost(req, res) {
     endDate,
     tag,
     schedules: newSchedules,
-    distances: parseInt(distances),
+    distances,
     cost: parseInt(cost),
     peopleCount: parseInt(peopleCount),
     isPublic,
@@ -157,7 +157,7 @@ export async function updatePost(req, res) {
     endDate,
     tag,
     schedules: newSchedules,
-    distances: parseInt(distances),
+    distances,
     cost: parseInt(cost),
     peopleCount: parseInt(peopleCount),
     isPublic,
@@ -202,5 +202,5 @@ export async function deletePost(req, res) {
     });
   }
 
-  return res.status(204);
+  return res.status(204).json('삭제되었습니다.');
 }
