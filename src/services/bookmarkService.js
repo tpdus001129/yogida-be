@@ -15,6 +15,10 @@ export async function getAllBookmarksByUserId(userId) {
       });
     });
 
+  if (!bookmarks) {
+    return [];
+  }
+
   // ObjectId를 포함한 북마크 정보 반환
   const bookmarksWithObjectId = bookmarks.map((bookmark) => {
     return {
