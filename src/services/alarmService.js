@@ -69,6 +69,7 @@ export async function createAlarm(postId, senderId, alarmType) {
   const foundPost = await Post.findOne({ _id: postId }, { authorId: 1 });
 
   const alarm = new Alarm({
+    postId,
     receiverId: foundPost.authorId,
     senderId,
     alarmType,
