@@ -1,8 +1,6 @@
 import express from 'express';
 import * as postController from '../../controllers/postController.js';
 import asyncHandler from '../../middleware/asyncHandler.js';
-import validator from '../../middleware/validator.js';
-import { post } from '../../middleware/validators/post.js';
 import { isAuth } from '../../middleware/isAuth.js';
 import upload from '../../middleware/uploader.js';
 
@@ -21,7 +19,7 @@ postRouter.get('/:postId', asyncHandler(postController.getPostById));
 postRouter.post('/', isAuth, upload.array('image', 10), asyncHandler(postController.createPost));
 
 // 게시글 수정
-postRouter.put('/:postId', isAuth, validator(post), asyncHandler(postController.updatePost));
+postRouter.put('/:postId', isAuth, upload.array('image', 10), asyncHandler(postController.updatePost));
 
 // 게시글 삭제
 postRouter.delete('/:postId', asyncHandler(postController.deletePost));

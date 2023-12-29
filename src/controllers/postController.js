@@ -101,7 +101,7 @@ export async function createPost(req, res) {
     endDate,
     tag,
     schedules: newSchedules,
-    distances,
+    distances: parseInt(distances),
     cost: parseInt(cost),
     peopleCount: parseInt(peopleCount),
     isPublic,
@@ -116,24 +116,39 @@ export async function updatePost(req, res) {
   const userId = req.userId;
   const postId = req.params.postId;
 
-  if (!userId) {
-    throw new CustomError(commonError.USER_UNKNOWN_ERROR, '수정하려는 특정 사용자를 찾을 수 없습니다.', {
-      statusCode: 404,
-    });
-  }
+  // if (!userId) {
+  //   throw new CustomError(commonError.USER_UNKNOWN_ERROR, '수정하려는 특정 사용자를 찾을 수 없습니다.', {
+  //     statusCode: 404,
+  //   });
+  // }
 
-  if (!postId) {
-    throw new CustomError(
-      commonError.POST_UNKNOWN_ERROR,
-      '수정하려는 해당 게시글의 고유 아이디값을 찾을 수 없습니다.',
-      {
-        statusCode: 404,
-      },
-    );
-  }
+  // if (!postId) {
+  //   throw new CustomError(
+  //     commonError.POST_UNKNOWN_ERROR,
+  //     '수정하려는 해당 게시글의 고유 아이디값을 찾을 수 없습니다.',
+  //     {
+  //       statusCode: 404,
+  //     },
+  //   );
+  // }
+
+  const body = JSON.parse(req.body.payload);
 
   const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
-    req.body;
+    body;
+
+  let newSchedules = schedules.map((schedule) => schedule);
+
+  req.files.forEach((file) => {
+    // '1-1'을 [1, 1] 형태로 변환합니다.
+    const indices = file.originalname.split('-').map((num) => parseInt(num, 10) - 1);
+    const scheduleRow = newSchedules[indices[0]];
+
+    if (scheduleRow && scheduleRow[indices[1]]) {
+      // schedules의 해당 인덱스에 있는 객체의 placeImageSrc에 file.path를 할당합니다.
+      scheduleRow[indices[1]].placeImageSrc = `/images/${file.filename}`;
+    }
+  });
 
   const result = await postService.updatePost(userId, postId, {
     title,
@@ -141,10 +156,10 @@ export async function updatePost(req, res) {
     startDate,
     endDate,
     tag,
-    schedules,
-    distances,
-    cost,
-    peopleCount,
+    schedules: newSchedules,
+    distances: parseInt(distances),
+    cost: parseInt(cost),
+    peopleCount: parseInt(peopleCount),
     isPublic,
     reviewText,
   });
