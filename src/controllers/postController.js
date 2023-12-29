@@ -4,42 +4,23 @@ import * as postService from '../services/postService.js';
 
 export async function getPosts(req, res) {
   const filter = req.query;
-
-  const posts = [];
+  console.log(filter);
 
   // 전체 조회
-  if (Object.keys(filter).length === 0 || (!filter.tag && !filter.city)) {
+  if (Object.keys(req.query).length === 0) {
     const allPosts = await postService.getAllPosts();
-    posts.push(...allPosts);
+    return res.status(200).json({ posts: allPosts });
   }
-
-  // 여행지로 조회
-  if (filter.city) {
-    const postsByDestination = await postService.getAllPostsByDestination(filter.city);
-    posts.push(...postsByDestination);
-  }
-
-  // 태그로 조회
-  if (filter.tag) {
-    const tags = filter.tag.split(',');
-    const postsByTags = await postService.getAllPostsByTags(tags);
-    posts.push(...postsByTags);
-  }
-
-  if (filter.sort) {
-    const sort = filter.sort;
-
-    // 정렬기준(최신순, 오래된순, 찜많은 순) 중복 선택되었는지 검사
-    if (sort.split(',').length > 1) {
-      throw new CustomError(commonError.TAG_COUNT_ERROR, '정렬 기준 선택지는 하나만 선택 가능합니다.', {
-        statusCode: 404,
-      });
+  //정렬 기준 ('latest', 'oldest', 'likeCount')
+  // 장소와 태그, 정렬 조회
+  if (filter.city || filter.tag || filter.sort) {
+    let tags;
+    if (filter.tag) {
+      tags = filter.tag.split(',');
     }
-
-    const sortedPosts = await postService.getPostsBySort(sort, posts);
-    return res.status(200).json({ posts: sortedPosts });
+    const posts = await postService.findPostsByDestinationAndTag(filter.city, tags, filter.sort);
+    return res.status(200).json({ posts });
   }
-  return res.status(200).json({ posts });
 }
 
 // 특정 게시글 조회
