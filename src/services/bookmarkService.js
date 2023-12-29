@@ -28,13 +28,14 @@ export async function getAllBookmarksByUserId(userId) {
     };
   });
 
-  const singleScheduleIds = bookmarks.map((i) => i.singleScheduleId);
-
   // 북마크가 담고 있는 singleSchedule의 내용들을 반환
   const selectedSchedule = bookmarksWithObjectId.flatMap((bookmark) => {
     const allSchedules = bookmark.postId.schedules.flat();
-    const matchingSchedule = allSchedules.find((schedule) => singleScheduleIds.some((id) => id.equals(schedule._id)));
-    return matchingSchedule ? { ...matchingSchedule, postId: bookmark.postId, bookmarkId: bookmark.bookmarkId } : [];
+    const matchingSchedule = allSchedules.find((schedule) => {
+      return schedule._id.equals(bookmark.singleScheduleId);
+    });
+
+    return matchingSchedule ? { matchingSchedule, postId: bookmark.postId, bookmarkId: bookmark.bookmarkId } : [];
   });
 
   selectedSchedule.sort((a, b) => b.createdAt - a.createdAt);
