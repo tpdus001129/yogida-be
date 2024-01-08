@@ -31,14 +31,14 @@ export async function kakaoAuthRedirectHandler(req, res) {
     res.cookie('token', token, {
       httpOnly: true,
     });
-    return res.status(302).redirect(`http://kdt-sw-7-team08.elicecoding.com`);
+    return res.status(302).redirect(config.host.clientUri);
   } else {
     // 없다면 회원가입 페이지로 리다이렉트
     res.cookie('accessToken', data.access_token, {
       httpOnly: true,
     });
     // 추가 정보 받는 페이지로 리다이렉트~
-    return res.status(302).redirect(`http://kdt-sw-7-team08.elicecoding.com/setup`);
+    return res.status(302).redirect(`${config.host.clientUri}/setup`);
   }
 }
 
