@@ -8,8 +8,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development nodemon src/app",
-    "start": "NODE_ENV=production nodemon src/app",
+    "dev": "cross-env NODE_ENV=development nodemon src/app",
+    "start": "cross-env NODE_ENV=production nodemon src/app",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -27,6 +27,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
     "eslint": "^8.55.0",
     "eslint-plugin-node": "^11.1.0",
