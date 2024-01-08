@@ -4,7 +4,6 @@ import * as postService from '../services/postService.js';
 
 export async function getPosts(req, res) {
   const filter = req.query;
-  console.log(filter);
 
   // 전체 조회
   if (Object.keys(req.query).length === 0) {

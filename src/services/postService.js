@@ -281,39 +281,68 @@ export async function deletePost(userId, postId) {
   // 작성자와 수정하려는 사용자가 일치한지
   checkUserId(post, userId);
 
-  await Comment.deleteMany({ postId: { $in: postId } })
-    .lean()
-    .catch((error) => {
+  // await Comment.deleteMany({ postId: { $in: postId } })
+  //   .lean()
+  //   .catch((error) => {
+  //     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+  //       statusCode: 500,
+  //       cause: error,
+  //     });
+  //   });
+
+  // await Like.deleteMany({ postId: { $in: postId } })
+  //   .lean()
+  //   .catch((error) => {
+  //     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+  //       statusCode: 500,
+  //       cause: error,
+  //     });
+  //   });
+
+  // await Bookmark.deleteMany({ postId: { $in: postId } })
+  //   .lean()
+  //   .catch((error) => {
+  //     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+  //       statusCode: 500,
+  //       cause: error,
+  //     });
+  //   });
+
+  Promise.all([
+    await Comment.deleteMany({ postId: { $in: postId } })
+      .lean()
+      .catch((error) => {
+        throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+          statusCode: 500,
+          cause: error,
+        });
+      }),
+
+    await Like.deleteMany({ postId: { $in: postId } })
+      .lean()
+      .catch((error) => {
+        throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+          statusCode: 500,
+          cause: error,
+        });
+      }),
+
+    await Bookmark.deleteMany({ postId: { $in: postId } })
+      .lean()
+      .catch((error) => {
+        throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+          statusCode: 500,
+          cause: error,
+        });
+      }),
+
+    await Post.deleteOne({ _id: postId }).catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
         statusCode: 500,
         cause: error,
       });
-    });
-
-  await Like.deleteMany({ postId: { $in: postId } })
-    .lean()
-    .catch((error) => {
-      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-        statusCode: 500,
-        cause: error,
-      });
-    });
-
-  await Bookmark.deleteMany({ postId: { $in: postId } })
-    .lean()
-    .catch((error) => {
-      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-        statusCode: 500,
-        cause: error,
-      });
-    });
-
-  return await Post.deleteOne({ _id: postId }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
-    });
-  });
+    }),
+  ]);
 }
 
 export async function findPostsByDestinationAndTag(destination, tag, sort) {

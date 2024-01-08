@@ -1,4 +1,10 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+// 만약 process.env.NODE_ENV 를 판별해 환경에 따라 다른 env 파일을 사용한다.
+if (process.env.NODE_ENV === 'production') {
+  dotenv.config({ path: '.env.production' });
+} else {
+  dotenv.config({ path: '.env.development' });
+}
 
 function validateKey(key, defaultValue = undefined) {
   // process.env의 key값이 존재하지 않으면 defaultValue를 반환한다.
@@ -14,6 +20,7 @@ function validateKey(key, defaultValue = undefined) {
 const config = {
   host: {
     port: validateKey('SERVER_PORT'),
+    clientUri: validateKey('CLIENT_URI'),
   },
   db: {
     host: validateKey('MONGO_HOST'),

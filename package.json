@@ -8,7 +8,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/app",
+    "dev": "NODE_ENV=development nodemon src/app",
+    "start": "NODE_ENV=production nodemon src/app",
     "prepare": "husky install"
   },
   "dependencies": {
