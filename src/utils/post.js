@@ -162,6 +162,14 @@ export function getCommonAggregate() {
       },
     },
     {
+      $lookup: {
+        from: 'schedules',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'schedules',
+      },
+    },
+    {
       $project: {
         authorId: 1,
         title: 1,
@@ -175,6 +183,47 @@ export function getCommonAggregate() {
         peopleCount: 1,
         likeCount: { $size: '$likes' },
         commentCount: { $add: [{ $size: '$comments' }, { $size: '$replies' }] },
+        isPublic: 1,
+        reviewText: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+  ];
+}
+
+export function getCommonAggregateByUserId(userId) {
+  return [
+    {
+      $match: {
+        authorId: userId,
+      },
+    },
+    {
+      $lookup: {
+        from: 'schedules',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'schedules',
+      },
+    },
+    {
+      $project: {
+        authorId: 1,
+        title: 1,
+        destination: 1,
+        startDate: 1,
+        endDate: 1,
+        tag: 1,
+        schedules: 1,
+        distances: 1,
+        cost: 1,
+        peopleCount: 1,
         isPublic: 1,
         reviewText: 1,
         createdAt: 1,

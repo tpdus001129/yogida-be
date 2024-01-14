@@ -1,4 +1,6 @@
 import Joi from 'joi';
+import CustomError from '../errorHandler.js';
+import commonError from '../../constants/errorConstant.js';
 
 export const post = Joi.object({
   body: Joi.object({
@@ -29,5 +31,20 @@ export const post = Joi.object({
   query: Joi.object(),
   params: Joi.object({
     postId: Joi.string().trim().empty(),
+  }),
+});
+
+export const postById = Joi.object({
+  body: Joi.object(),
+  query: Joi.object(),
+  params: Joi.object({
+    postId: Joi.string()
+      .hex()
+      .min(24)
+      .max(24)
+      .required()
+      .error(() => {
+        throw new CustomError(commonError.VALIDATION_ERROR, 'postId 의 형식을 확인해 주세요');
+      }),
   }),
 });
