@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 const bookmarkSchema = new Schema(
   {
-    authorId: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
@@ -12,9 +12,9 @@ const bookmarkSchema = new Schema(
       ref: 'Post',
       required: true,
     },
-    singleScheduleId: {
+    scheduleId: {
       type: Schema.Types.ObjectId,
-      ref: 'SingleSchedule',
+      ref: 'Schedule',
       required: true,
     },
   },

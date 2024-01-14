@@ -5,8 +5,9 @@ import Post from '../models/schemas/Post.js';
 
 // 특정 사용자의 모든 북마크 조회
 export async function getAllBookmarksByUserId(userId) {
-  const bookmarks = await Bookmark.find({ authorId: userId })
-    .populate({ path: 'postId', model: 'Post', select: 'schedules' })
+  const bookmarks = await Bookmark.find({ userId })
+    // .populate({ path: 'postId', model: 'Post', select: 'schedules' })
+    .populate('scheduleId')
     .lean()
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
@@ -15,31 +16,7 @@ export async function getAllBookmarksByUserId(userId) {
       });
     });
 
-  if (!bookmarks) {
-    return [];
-  }
-
-  // ObjectId를 포함한 북마크 정보 반환
-  const bookmarksWithObjectId = bookmarks.map((bookmark) => {
-    return {
-      ...bookmark,
-      postId: bookmark.postId,
-      bookmarkId: bookmark._id,
-    };
-  });
-
-  // 북마크가 담고 있는 singleSchedule의 내용들을 반환
-  const selectedSchedule = bookmarksWithObjectId.flatMap((bookmark) => {
-    const allSchedules = bookmark.postId.schedules.flat();
-    const matchingSchedule = allSchedules.find((schedule) => {
-      return schedule._id.equals(bookmark.singleScheduleId);
-    });
-
-    return matchingSchedule ? { matchingSchedule, postId: bookmark.postId, bookmarkId: bookmark.bookmarkId } : [];
-  });
-
-  selectedSchedule.sort((a, b) => b.createdAt - a.createdAt);
-  return selectedSchedule;
+  return bookmarks;
 }
 
 // 사용자가 즐겨찾기로 추가하려는 여행 장소가 실제로 post에 저장되어있는지 확인
@@ -51,11 +28,11 @@ export async function getSingleScheduleIdByPostId(postId, singleScheduleId) {
 }
 
 // 특정 사용자의 북마크 추가
-export async function createBookmark(userId, singleScheduleId, postId) {
+export async function createBookmark(userId, scheduleId, postId) {
   const findBookmark = await Bookmark.findOne({
-    authorId: userId,
-    singleScheduleId: singleScheduleId,
-    postId: postId,
+    userId,
+    scheduleId,
+    postId,
   }).lean();
 
   if (findBookmark) {
@@ -64,14 +41,12 @@ export async function createBookmark(userId, singleScheduleId, postId) {
     });
   }
 
-  return await Bookmark.create({ authorId: userId, singleScheduleId: singleScheduleId, postId: postId }).catch(
-    (error) => {
-      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-        statusCode: 500,
-        cause: error,
-      });
-    },
-  );
+  return await Bookmark.create({ userId, scheduleId, postId }).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
 }
 
 // 특정 유저의 북마크 삭제
@@ -100,12 +75,13 @@ export async function deleteBookmarks(userId, bookmarkIds) {
 
   // 저장한 사용자와 삭제할 사용자가 일치한지 확인 -> 삭제
   for (const bookmark of bookmarks) {
-    if (!bookmark.authorId.equals(userId)) {
+    // console.log()
+    if (!bookmark.userId.equals(userId)) {
       // Skip bookmarks with different authorId
       continue;
     }
 
-    await Bookmark.deleteMany({ _id: { $in: bookmarkIds }, authorId: userId }).catch((error) => {
+    await Bookmark.deleteMany({ _id: { $in: bookmarkIds }, userId }).catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
         statusCode: 500,
         cause: error,
