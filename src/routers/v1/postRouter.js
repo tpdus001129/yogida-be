@@ -3,6 +3,8 @@ import * as postController from '../../controllers/postController.js';
 import asyncHandler from '../../middleware/asyncHandler.js';
 import { isAuth } from '../../middleware/isAuth.js';
 import upload from '../../middleware/uploader.js';
+import validator from '../../middleware/validator.js';
+import { postById } from '../../middleware/validators/post.js';
 
 const postRouter = express.Router();
 
@@ -13,7 +15,7 @@ postRouter.get('/', asyncHandler(postController.getPosts));
 postRouter.get('/my-page', isAuth, asyncHandler(postController.getAllPostsByUserId));
 
 // 게시글 세부 일정 조회 (상세페이지)
-postRouter.get('/:postId', asyncHandler(postController.getPostById));
+postRouter.get('/:postId', validator(postById), asyncHandler(postController.getPostById));
 
 // 게시글 생성
 postRouter.post('/', isAuth, upload.array('image', 10), asyncHandler(postController.createPost));

@@ -20,45 +20,45 @@ export async function getAllBookmarksByUserId(req, res) {
 // 특정 사용자의 북마크 추가
 export async function createBookmark(req, res) {
   const userId = req.userId;
-  const singleScheduleId = req.body.singleScheduleId;
+  const scheduleId = req.body.singleScheduleId;
   const postId = req.body.postId;
 
-  if (!userId) {
-    throw new CustomError(commonError.USER_UNKNOWN_ERROR, '추가하려는 특정 사용자를 찾을 수 없습니다.', {
-      statusCode: 404,
-    });
-  }
+  // if (!userId) {
+  //   throw new CustomError(commonError.USER_UNKNOWN_ERROR, '추가하려는 특정 사용자를 찾을 수 없습니다.', {
+  //     statusCode: 404,
+  //   });
+  // }
 
-  if (!singleScheduleId) {
-    throw new CustomError(
-      commonError.SCHEDULE_UNKNOWN_ERROR,
-      '추가하려는 해당 스케쥴의 고유 아이디값을 찾을 수 없습니다.',
-      {
-        statusCode: 404,
-      },
-    );
-  }
+  // if (!singleScheduleId) {
+  //   throw new CustomError(
+  //     commonError.SCHEDULE_UNKNOWN_ERROR,
+  //     '추가하려는 해당 스케쥴의 고유 아이디값을 찾을 수 없습니다.',
+  //     {
+  //       statusCode: 404,
+  //     },
+  //   );
+  // }
 
-  if (!postId) {
-    throw new CustomError(
-      commonError.POST_UNKNOWN_ERROR,
-      '추가하려는 해당 게시글의 고유 아이디값을 찾을 수 없습니다.',
-      {
-        statusCode: 404,
-      },
-    );
-  }
+  // if (!postId) {
+  //   throw new CustomError(
+  //     commonError.POST_UNKNOWN_ERROR,
+  //     '추가하려는 해당 게시글의 고유 아이디값을 찾을 수 없습니다.',
+  //     {
+  //       statusCode: 404,
+  //     },
+  //   );
+  // }
 
-  // 추가하려는 여행장소가 기존에 있는 여행 장소인지 확인
-  const result = await bookmarkService.getSingleScheduleIdByPostId(postId, singleScheduleId);
+  // // 추가하려는 여행장소가 기존에 있는 여행 장소인지 확인
+  // const result = await bookmarkService.getSingleScheduleIdByPostId(postId, singleScheduleId);
 
-  if (!result) {
-    throw new CustomError(commonError.SCHEDULE_EXIST_ERROR, '추가하려는 여행 장소를 찾을 수 없습니다.', {
-      statusCode: 404,
-    });
-  }
+  // if (!result) {
+  //   throw new CustomError(commonError.SCHEDULE_EXIST_ERROR, '추가하려는 여행 장소를 찾을 수 없습니다.', {
+  //     statusCode: 404,
+  //   });
+  // }
 
-  const createResult = await bookmarkService.createBookmark(userId, singleScheduleId, postId);
+  const createResult = await bookmarkService.createBookmark(userId, scheduleId, postId);
 
   if (!createResult) {
     throw new CustomError(commonError.BOOKMARK_CREATE_ERROR, '북마크 추가를 실패했습니다.', {
@@ -73,7 +73,7 @@ export async function createBookmark(req, res) {
 export async function deleteBookmarks(req, res) {
   const userId = req.userId;
   const bookmarkIds = req.body.bookmarkId;
-
+  console.log(bookmarkIds);
   if (!userId) {
     throw new CustomError(commonError.USER_UNKNOWN_ERROR, '삭제하려는 특정 사용자를 찾을 수 없습니다.', {
       statusCode: 404,
