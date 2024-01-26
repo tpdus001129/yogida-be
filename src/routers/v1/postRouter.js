@@ -2,14 +2,14 @@ import express from 'express';
 import * as postController from '../../controllers/postController.js';
 import asyncHandler from '../../middleware/asyncHandler.js';
 import { isAuth } from '../../middleware/isAuth.js';
-import upload from '../../middleware/uploader.js';
+import { postUploader } from '../../middleware/uploader.js';
 import validator from '../../middleware/validator.js';
-import { postById } from '../../middleware/validators/post.js';
+import { getPost, post, postById } from '../../middleware/validators/post.js';
 
 const postRouter = express.Router();
 
 // 전체 게시글 조회 (메인페이지)
-postRouter.get('/', asyncHandler(postController.getPosts));
+postRouter.get('/', validator(getPost), asyncHandler(postController.getPosts));
 
 // 특정 사용자의 전체 게시글 조회
 postRouter.get('/my-page', isAuth, asyncHandler(postController.getAllPostsByUserId));
@@ -18,10 +18,10 @@ postRouter.get('/my-page', isAuth, asyncHandler(postController.getAllPostsByUser
 postRouter.get('/:postId', validator(postById), asyncHandler(postController.getPostById));
 
 // 게시글 생성
-postRouter.post('/', isAuth, upload.array('image', 10), asyncHandler(postController.createPost));
+postRouter.post('/', isAuth, postUploader(post), asyncHandler(postController.createPost));
 
 // 게시글 수정
-postRouter.put('/:postId', isAuth, upload.array('image', 10), asyncHandler(postController.updatePost));
+postRouter.put('/:postId', isAuth, postUploader(post), asyncHandler(postController.updatePost));
 
 // 게시글 삭제
 postRouter.delete('/:postId', isAuth, asyncHandler(postController.deletePost));

@@ -5,6 +5,7 @@ import * as userService from '../services/userService.js';
 import CustomError from '../middleware/errorHandler.js';
 import { createToken } from '../utils/jwt.js';
 import commonError from '../constants/errorConstant.js';
+import { jsonParser } from '../utils/common.js';
 
 // 로그인 URL 넘겨주는 함수 (인가 코드 요청 함수)
 export async function kakaoLogin(req, res) {
@@ -44,73 +45,25 @@ export async function kakaoAuthRedirectHandler(req, res) {
 
 // 회원가입
 export async function signup(req, res) {
-  const { snsId, email, password, nickname, profileImageUrl, type } = req.body;
-  if (typeof snsId !== 'undefined' && typeof snsId !== 'string') {
-    return new CustomError(commonError.VALIDATION_ERROR, '올바른 아이디 형식이 아닙니다.', {
-      statusCode: 400,
-    });
-  }
+  const payload = req.body.payload;
 
-  if (typeof email !== 'undefined') {
-    if (typeof email !== 'string') {
-      return new CustomError(commonError.VALIDATION_ERROR, '올바른 이메일 형식이 아닙니다.', {
-        statusCode: 400,
-      });
-    }
+  const parsedPayload = jsonParser(payload);
 
-    if (!/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.exec(email)) {
-      return new CustomError(commonError.VALIDATION_ERROR, '올바른 이메일 형식이 아닙니다.', {
-        statusCode: 400,
-      });
-    }
-  } else {
-    return new CustomError(commonError.VALIDATION_ERROR, '올바른 이메일 형식이 아닙니다.', {
-      statusCode: 400,
-    });
-  }
+  const { snsId, email, password, nickname, type, profileImageSrc: image } = parsedPayload;
 
-  if (typeof password !== 'undefined') {
-    if (typeof password !== 'string') {
-      return new CustomError(commonError.VALIDATION_ERROR, '비밀번호 형식이 올바르지 않습니다.', {
-        statusCode: 400,
-      });
-    }
-
-    if (password.length < 8 || !/^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_])/.exec(password)) {
-      return new CustomError(commonError.VALIDATION_ERROR, '비밀번호 형식이 올바르지 않습니다.', {
-        statusCode: 400,
-      });
-    }
-  }
-
-  if (typeof nickname === 'undefined' || typeof nickname !== 'string') {
-    return new CustomError(commonError.VALIDATION_ERROR, '닉네임 형식이 올바르지 않습니다.', {
-      statusCode: 400,
-    });
-  }
-
-  if (typeof profileImageUrl !== 'undefined' && typeof profileImageUrl !== 'string') {
-    return new CustomError(commonError.VALIDATION_ERROR, '프로필 경로 형식이 올바르지 않습니다.', {
-      statusCode: 400,
-    });
-  }
-
-  if (typeof type !== 'undefined' && typeof type !== 'string') {
-    return new CustomError(commonError.VALIDATION_ERROR, '타입 형식이 올바르지 않습니다.', {
-      statusCode: 400,
-    });
-  }
   let token;
   let profileImageSrc;
+
+  if (req.file) {
+    profileImageSrc = `/images/${req.file.filename}`;
+  } else {
+    if (type === 'kakao') profileImageSrc = image;
+  }
+
   if (type === 'kakao') {
-    if (req.file) {
-      profileImageSrc = `/images/${req.file.filename}`;
-    } else {
-      profileImageSrc = profileImageUrl;
-    }
     token = await authService.snsSignup(snsId, email, nickname, profileImageSrc);
   } else {
-    token = await authService.signup(email, password, nickname);
+    token = await authService.signup(email, password, nickname, profileImageSrc);
   }
 
   // 여기서 auth에 email로 찾아서 삭제한다.
@@ -147,12 +100,12 @@ export async function login(req, res) {
   // body에서 이메일, 패스워드를 받아온다.
   const { email, password } = req.body;
 
-  const token = await authService.login(email, password, 'email');
+  const { token, user } = await authService.login(email, password, 'email');
 
   res.cookie('token', token, {
     httpOnly: true,
   });
-  return res.status(201).json({ message: '로그인 성공' });
+  return res.status(201).json({ message: '로그인 성공', user });
 }
 
 // 비밀번호 변경 하기
@@ -198,6 +151,7 @@ export async function kakaoMe(req, res) {
 
 // 카카오 연결 끊기
 export async function kakaoUnlink(req, res) {
+  const userId = req.userId;
   const snsId = req.user.snsId;
   const bodyData = {
     target_id_type: 'user_id',
@@ -216,6 +170,9 @@ export async function kakaoUnlink(req, res) {
         cause: err,
       });
     });
+
+  await userService.deleteUser(userId);
+  res.clearCookie('token');
   return res.status(200).json({ message: '연결 해제 성공', snsId: result.data.id });
 }
 
@@ -223,7 +180,7 @@ export async function withdraw(req, res) {
   const userId = req.userId;
 
   await userService.deleteUser(userId);
-
+  res.clearCookie('token');
   return res.status(200).json({ message: '탈퇴 성공' });
 }
 

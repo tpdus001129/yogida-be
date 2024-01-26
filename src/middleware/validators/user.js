@@ -31,3 +31,11 @@ export const checkEmail = Joi.object({
   query: Joi.object(),
   params: Joi.object(),
 });
+
+export const updateUser = Joi.object({
+  body: Joi.object({
+    nickname: Joi.string(),
+  }),
+  query: Joi.object(),
+  params: Joi.object(),
+});

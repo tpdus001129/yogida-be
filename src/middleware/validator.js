@@ -10,9 +10,10 @@ export default function validator(schema) {
       req.body = validated.body;
       req.query = validated.query;
       req.params = validated.params;
+
       next();
     } catch (err) {
-      if (err.isJoi) next(err.message);
+      if (err.isJoi) next(err);
       next(err);
     }
   };

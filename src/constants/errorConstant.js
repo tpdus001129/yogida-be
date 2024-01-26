@@ -36,6 +36,9 @@ const commonError = Object.seal({
   AUTHENTICATION_ERROR: 'Authentication Error',
 
   KAKAO_API_ERROR: 'Kakao API Error',
+
+  JSON_SYNTAX_ERROR: 'JSON syntax error',
+  NOT_FOUND_VALUE_ERROR: 'is undefined.',
 });
 
 export default commonError;
