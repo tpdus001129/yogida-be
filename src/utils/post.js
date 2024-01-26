@@ -24,7 +24,7 @@ const tagList = new Map(
 );
 
 // 여기다에서 제공되는 여행 목록
-const cityList = new Map(
+export const cityList = new Map(
   [
     '국내',
     '가평·양평',

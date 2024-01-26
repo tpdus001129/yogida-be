@@ -1,22 +1,23 @@
 import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
 import * as postService from '../services/postService.js';
+import { jsonParser } from '../utils/common.js';
 
 export async function getPosts(req, res) {
   const filter = req.query;
-
-  // 전체 조회
+  // 전체 조회 (filter 가 {} 일 때)
   if (Object.keys(req.query).length === 0) {
     const allPosts = await postService.getAllPosts();
     return res.status(200).json({ posts: allPosts });
   }
-  //정렬 기준 ('latest', 'oldest', 'likeCount')
-  // 장소와 태그, 정렬 조회
+  //정렬 기준 ('최신순', '오래된순', '찜많은순')
+  // 장소와 태그, 정렬 조회 (filter 가 { city: ... , tag: ... , sort: ...} 중 하나라도 있을 때)
   if (filter.city || filter.tag || filter.sort) {
     let tags;
     if (filter.tag) {
-      tags = filter.tag.split(',');
+      tags = filter.tag.split(','); // tag가 문자열로 오기 때문에 배열로 변환,
     }
+    console.log(`split한후, `, tags);
     const posts = await postService.findPostsByDestinationAndTag(filter.city, tags, filter.sort);
     return res.status(200).json({ posts });
   }
@@ -55,10 +56,14 @@ export async function getAllPostsByUserId(req, res) {
 // 게시글 추가
 export async function createPost(req, res) {
   const userId = req.userId;
-  const body = JSON.parse(req.body.payload);
+
+  const payload = req.body.payload;
+
+  const parsedPayload = jsonParser(payload);
+
   const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
-    body;
-  const files = req.files;
+    parsedPayload;
+  const files = req.files.image;
 
   await postService.createPost(
     userId,
@@ -85,12 +90,13 @@ export async function createPost(req, res) {
 export async function updatePost(req, res) {
   const userId = req.userId;
   const postId = req.params.postId;
+  const payload = req.body.payload;
 
-  const body = JSON.parse(req.body.payload);
+  const parsedPayload = jsonParser(payload);
 
   const { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText } =
-    body;
-  const files = req.files;
+    parsedPayload;
+  const files = req.files.image;
 
   await postService.updatePost(userId, postId, files, {
     title,

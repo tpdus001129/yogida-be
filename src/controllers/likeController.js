@@ -7,11 +7,9 @@ import { createAlarm } from '../services/alarmService.js';
 export async function getAllLikedPosts(req, res) {
   const userId = req.userId;
   const likedPosts = await likeService.getAllLikedPosts(userId);
-
   if (!likedPosts) {
     res.status(200).json([]);
   }
-
   res.status(200).json({ likedPosts });
 }
 
@@ -20,7 +18,6 @@ export async function createLike(req, res) {
   const userId = req.userId;
   const postId = req.body.postId;
   const like = await likeService.createLike(userId, postId);
-
   if (!like) {
     throw new CustomError(commonError.LIKE_UNKNOWN_ERROR, '찜을 찾을 수 없습니다.', {
       statusCode: 404,

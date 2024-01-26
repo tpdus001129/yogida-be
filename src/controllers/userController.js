@@ -1,4 +1,5 @@
 import * as userService from '../services/userService.js';
+import { jsonParser } from '../utils/common.js';
 
 // 특정 유저 조회
 export async function getUserById(req, res) {
@@ -15,7 +16,10 @@ export async function getUserById(req, res) {
 // 자기 자신 정보 수정
 export async function updateUser(req, res) {
   const userId = req.userId;
-  const { nickname } = req.body;
+  const payload = req.body.payload;
+
+  const { nickname } = jsonParser(payload);
+
   let profileImageSrc;
 
   // 업로드 성공했을때
