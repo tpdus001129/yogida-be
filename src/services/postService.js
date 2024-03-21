@@ -164,7 +164,9 @@ export async function createPost(
       let src = '';
       const finedFiles = files?.find((file) => file.originalname === schedule.placeName);
       if (finedFiles) {
-        src = `/images/${files.find((file) => file.originalname === schedule.placeName).filename}`;
+        // src = `/images/${files.find((file) => file.originalname === schedule.placeName).filename}`;
+        // multer-s3용 코드
+        src = `${files.find((file) => file.originalname === schedule.placeName).location}`;
       }
 
       return {
@@ -238,7 +240,9 @@ export async function updatePost(
     if (files.length > 0) {
       // files 배열을 순회 해서 file의 originalname과 schedule의 placeName이 일치하는것만 업데이트.
       const file = files.find((file) => file.originalname === schedule.placeName);
-      return file ? { postId, ...schedule, placeImageSrc: `/images/${file.filename}` } : { postId, ...schedule };
+      // return file ? { postId, ...schedule, placeImageSrc: `/images/${file.filename}` } : { postId, ...schedule };
+      // multer-s3용 코드
+      return file ? { postId, ...schedule, placeImageSrc: `${file.location}` } : { postId, ...schedule };
     }
   });
 

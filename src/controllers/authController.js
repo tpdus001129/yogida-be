@@ -55,7 +55,9 @@ export async function signup(req, res) {
   let profileImageSrc;
 
   if (req.file) {
-    profileImageSrc = `/images/${req.file.filename}`;
+    // profileImageSrc = `/images/${req.file.filename}`;
+    // multer-s3용 코드
+    profileImageSrc = `${req.file.location}`;
   } else {
     if (type === 'kakao') profileImageSrc = image;
   }

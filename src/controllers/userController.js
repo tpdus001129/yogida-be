@@ -24,7 +24,9 @@ export async function updateUser(req, res) {
 
   // 업로드 성공했을때
   if (req.file) {
-    profileImageSrc = `/images/${req.file.filename}`;
+    // profileImageSrc = `/images/${req.file.filename}`;
+    // multer-s3용 코드
+    profileImageSrc = `${req.file.location}`;
   }
 
   const user = await userService.updateUser({ userId, nickname, profileImageSrc });
