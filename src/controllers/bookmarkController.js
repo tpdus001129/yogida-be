@@ -20,7 +20,7 @@ export async function getAllBookmarksByUserId(req, res) {
 // 특정 사용자의 북마크 추가
 export async function createBookmark(req, res) {
   const userId = req.userId;
-  const { scheduleId, postId } = req.body;
+  const { singleScheduleId: scheduleId, postId } = req.body;
 
   const createResult = await bookmarkService.createBookmark(userId, scheduleId, postId);
 
