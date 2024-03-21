@@ -78,6 +78,7 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+src/images/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
@@ -112,8 +113,10 @@ web_modules/
 # dotenv environment variable files
 .env
 .env.development.local
+.env.development
 .env.test.local
 .env.production.local
+.env.production
 .env.local
 
 # parcel-bundler cache (https://parceljs.org/)

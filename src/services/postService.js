@@ -1,15 +1,21 @@
+import mongoose from 'mongoose';
+
 import commonError from '../constants/errorConstant.js';
 import CustomError from '../middleware/errorHandler.js';
-import Post from '../models/schemas/Post.js';
+import Post, { Schedule } from '../models/schemas/Post.js';
+import Bookmark from '../models/schemas/Bookmark.js';
+import Comment from '../models/schemas/Comment.js';
+import Like from '../models/schemas/Like.js';
 import {
   checkPost,
   checkUserId,
   checkTagListHasTag,
   checkCityListHasCity,
   checkSortListHasSort,
-  checkScheduleLengthAndDay,
-  checkSchedulePlaceAndDistances,
+  // checkScheduleLengthAndDay,
+  // checkSchedulePlaceAndDistances,
   getCommonAggregate,
+  getCommonAggregateByUserId,
 } from '../utils/post.js';
 
 /// 모든 게시글 조회
@@ -20,33 +26,44 @@ export async function getAllPosts() {
       cause: error,
     });
   });
-
   return posts;
 }
 
 // 특정 게시글 조회
 export async function getPostById(postId) {
-  return await Post.findOne({ _id: postId })
-    .populate({ path: 'authorId', select: '_id nickname' })
-    .lean()
-    .catch((error) => {
-      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-        statusCode: 500,
-        cause: error,
-      });
+  const [post, schedules] = await Promise.all([
+    Post.findOne({ _id: postId })
+      .populate({
+        path: 'authorId',
+        select: '_id nickname profileImageSrc',
+      })
+      .lean(),
+    Schedule.find({ postId }),
+  ]).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
     });
+  });
+
+  if (schedules.length) {
+    post.schedules = schedules;
+  }
+
+  return post;
 }
 
 //특정 사용자의 게시글 조회
 export async function getAllPostsByUserId(userId) {
-  return await Post.find({ authorId: userId })
-    .lean()
-    .catch((error) => {
-      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-        statusCode: 500,
-        cause: error,
-      });
+  const posts = await Post.aggregate(getCommonAggregateByUserId(userId)).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
     });
+  });
+
+  posts.sort((a, b) => b.createdAt - a.createdAt);
+  return posts;
 }
 
 // 태그 필터링된 게시글 조회
@@ -106,41 +123,81 @@ export async function getPostsBySort(sort, posts) {
 export async function createPost(
   userId,
   { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
+  files,
 ) {
   // 사용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-  checkTagListHasTag(tag);
+  // checkTagListHasTag(tag);
 
   // 사용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
   checkCityListHasCity(destination);
 
-  // 여행일정과 디데일 일치한지 검사
-  checkScheduleLengthAndDay(schedules, startDate, endDate);
+  // // 여행일정과 디데일 일치한지 검사
+  // checkScheduleLengthAndDay(schedules, startDate, endDate);
 
   // 세부 장소와 거리 수가 일치한지 검사
-  checkSchedulePlaceAndDistances(schedules, distances);
+  // checkSchedulePlaceAndDistances(schedules, distances);
 
-  const createdPost = await Post.create({
-    authorId: userId,
-    title,
-    destination,
-    startDate,
-    endDate,
-    tag,
-    schedules,
-    distances,
-    cost,
-    peopleCount,
-    isPublic,
-    reviewText,
-  });
+  // 세션 시작
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const [createdPost] = await Post.create(
+      [
+        {
+          authorId: userId,
+          title,
+          destination,
+          startDate,
+          endDate,
+          tag,
+          distances,
+          cost,
+          peopleCount,
+          isPublic,
+          reviewText,
+        },
+      ],
+      { session },
+    );
 
-  return createdPost;
+    const newSchedules = schedules.map((schedule) => {
+      let src = '';
+      const finedFiles = files?.find((file) => file.originalname === schedule.placeName);
+      if (finedFiles) {
+        // src = `/images/${files.find((file) => file.originalname === schedule.placeName).filename}`;
+        // multer-s3용 코드
+        src = `${files.find((file) => file.originalname === schedule.placeName).location}`;
+      }
+
+      return {
+        postId: createdPost._id,
+        ...schedule,
+        placeImageSrc: src ? src : 'default',
+      };
+    });
+
+    // 받은 배열을 한번에 저장한다.
+    await Schedule.insertMany(newSchedules, { session });
+    createdPost.schedules = newSchedules;
+
+    await session.commitTransaction();
+    return createdPost;
+  } catch (error) {
+    await session.abortTransaction();
+    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+      statusCode: 500,
+      cause: error,
+    });
+  } finally {
+    session.endSession();
+  }
 }
 
 // 특정 사용자의 게시글 수정 (해당 사용자가 수정하는게 맞는지 확인 필수)
 export async function updatePost(
   userId,
   postId,
+  files,
   { title, destination, startDate, endDate, tag, schedules, distances, cost, peopleCount, isPublic, reviewText },
 ) {
   const post = await Post.findOne({ _id: postId })
@@ -152,23 +209,48 @@ export async function updatePost(
       });
     });
 
-  // post가 있는지 확인
-  checkPost(post);
+  // // post가 있는지 확인
+  // checkPost(post);
 
   // 작성자와 수정하려는 사용자가 일치한지
   checkUserId(post, userId);
 
-  // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
-  checkTagListHasTag(tag);
+  // // 시용자가 선택한 태그들이 기존에 제공된 태그인지 검사
+  // checkTagListHasTag(tag);
 
-  // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
-  checkCityListHasCity(destination);
+  // // 시용자가 검색한 여행지가 기존에 제공된 여행지인지 검사
+  // checkCityListHasCity(destination);
 
   // 여행일정과 디데일 일치한지 검사
-  checkScheduleLengthAndDay(schedules, startDate, endDate);
+  // checkScheduleLengthAndDay(schedules, startDate, endDate);
 
   // 세부 장소와 거리 수가 일치한지 검사
-  checkSchedulePlaceAndDistances(schedules, distances);
+  // checkSchedulePlaceAndDistances(schedules, distances);
+
+  // files에 넘어온 데이터로 placeImageSrc를 업데이트 시킨다.
+  const newSchedules = schedules.map((schedule) => {
+    // files 가 없을 경우 (업데이트 된 사진이 없을 때)
+    if (!files.length) {
+      // files는 없지만 schedule이 달라질때, (사진 없을때 포함, 사진이 있다면 files가 있을때로 넘어갈 것.)
+
+      return { postId, ...schedule }; // 아무것도 안하고 그냥 반환한다.
+    }
+
+    // files가 있을때, (업데이트 된 사진이 있을 때)
+    if (files.length > 0) {
+      // files 배열을 순회 해서 file의 originalname과 schedule의 placeName이 일치하는것만 업데이트.
+      const file = files.find((file) => file.originalname === schedule.placeName);
+      // return file ? { postId, ...schedule, placeImageSrc: `/images/${file.filename}` } : { postId, ...schedule };
+      // multer-s3용 코드
+      return file ? { postId, ...schedule, placeImageSrc: `${file.location}` } : { postId, ...schedule };
+    }
+  });
+
+  // 기존 Schedule 은 지운다.
+  await Schedule.deleteMany({ postId });
+
+  //  배열을 한번에 저장한다.
+  await Schedule.insertMany(newSchedules);
 
   const updatedPost = await Post.updateOne(
     { _id: postId },
@@ -178,7 +260,6 @@ export async function updatePost(
       startDate,
       endDate,
       tag,
-      schedules,
       distances,
       cost,
       peopleCount,
@@ -191,6 +272,7 @@ export async function updatePost(
       cause: error,
     });
   });
+
   if (updatedPost.modifiedCount === 0) {
     throw new CustomError(commonError.POST_MODIFY_ERROR, '게시글 수정을 실패하였습니다.', { statusCode: 404 });
   }
@@ -213,12 +295,98 @@ export async function deletePost(userId, postId) {
   checkPost(post);
 
   // 작성자와 수정하려는 사용자가 일치한지
-  checkUserId(userId);
+  checkUserId(post, userId);
 
-  return await Post.deleteOne({ _id: postId }).catch((error) => {
+  await Promise.all([
+    Comment.deleteMany({ postId: { $in: postId } })
+      .lean()
+      .catch((error) => {
+        throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+          statusCode: 500,
+          cause: error,
+        });
+      }),
+
+    Like.deleteMany({ postId: { $in: postId } })
+      .lean()
+      .catch((error) => {
+        throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+          statusCode: 500,
+          cause: error,
+        });
+      }),
+
+    Bookmark.deleteMany({ postId: { $in: postId } })
+      .lean()
+      .catch((error) => {
+        throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+          statusCode: 500,
+          cause: error,
+        });
+      }),
+
+    Post.deleteOne({ _id: postId }).catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    }),
+
+    Schedule.deleteMany({ postId }).catch((error) => {
+      throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+        statusCode: 500,
+        cause: error,
+      });
+    }),
+  ]).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'promise 실행 중 에러가 발생하였습니다.', {
+      statusCode: 500,
+      cause: error,
+    });
+  });
+}
+
+export async function findPostsByDestinationAndTag(destination, tag, sort) {
+  const query = {};
+
+  // 목적지가 주어진 경우 쿼리에 추가
+  if (destination) {
+    query.destination = destination;
+  }
+  // 태그가 주어진 경우, 배열 내 해당 태그가 있는지 확인
+  if (tag) {
+    query.tag = { $in: tag };
+  }
+
+  // aggregate 쿼리 설정
+  let aggregateQuery = [
+    { $match: query },
+    ...getCommonAggregate(), // 여기서 likeCount 등을 계산
+  ];
+
+  // 정렬 조건 추가
+  switch (sort) {
+    case '최신순':
+      aggregateQuery.push({ $sort: { createdAt: -1 } });
+      break;
+    case '오래된순':
+      aggregateQuery.push({ $sort: { createdAt: 1 } });
+      break;
+    case '찜많은순':
+      aggregateQuery.push({ $sort: { likeCount: -1 } });
+      break;
+    default:
+      // 기본 정렬 로직 (예: 최신순)
+      aggregateQuery.push({ $sort: { createdAt: -1 } });
+  }
+
+  // Post 모델을 사용하여 aggregate 쿼리 수행
+  const posts = await Post.aggregate(aggregateQuery).catch((error) => {
     throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
       statusCode: 500,
       cause: error,
     });
   });
+
+  return posts;
 }

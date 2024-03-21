@@ -10,7 +10,7 @@ import commonError from '../constants/errorConstant.js';
 const MAX_EXPIRY_MINUTE = 5;
 
 // 소셜 로그인 회원 가입 하기
-export async function snsSignup(snsId, email, nickname, profileImageUrl) {
+export async function snsSignup(snsId, email, nickname, profileImageSrc) {
   // 이미 가입된 이메일 있는지 검사
   const hasEmail = await User.findOne({ email });
 
@@ -24,7 +24,7 @@ export async function snsSignup(snsId, email, nickname, profileImageUrl) {
     snsId,
     email,
     nickname,
-    profileImageSrc: profileImageUrl,
+    profileImageSrc,
     provider: 'kakao',
   }).catch((err) => {
     throw new CustomError(commonError.DB_ERROR, '유저를 생성 하는 도중 문제가 생겼습니다.', {
@@ -38,7 +38,7 @@ export async function snsSignup(snsId, email, nickname, profileImageUrl) {
 }
 
 // 회원 가입 하기
-export async function signup(email, password, nickname) {
+export async function signup(email, password, nickname, profileImageSrc) {
   // 이미 가입된 이메일 있는지 검사
   const hasEmail = await User.findOne({ email });
 
@@ -57,6 +57,7 @@ export async function signup(email, password, nickname) {
     email,
     password: hashedPassword,
     nickname,
+    profileImageSrc,
     provider: 'email',
   }).catch((err) => {
     throw new CustomError(commonError.DB_ERROR, '유저를 생성 하는 도중 문제가 생겼습니다.', {
@@ -71,7 +72,7 @@ export async function signup(email, password, nickname) {
 
 // 로그인 하기
 export async function login(email, password) {
-  const user = await User.findOne({ email }).lean();
+  let user = await User.findOne({ email }).lean();
 
   if (!user) {
     throw new CustomError(commonError.AUTHENTICATION_ERROR, '이메일과 비밀번호를 확인해 주세요.', { statusCode: 400 });
@@ -90,9 +91,11 @@ export async function login(email, password) {
     throw new CustomError(commonError.AUTHENTICATION_ERROR, '이메일과 비밀번호를 확인해 주세요.', { statusCode: 400 });
   }
 
+  delete user.password;
+
   const token = createToken(user.email, user.nickname);
 
-  return token;
+  return { token, user };
 }
 
 // 비밀번호 변경 하기
@@ -111,18 +114,20 @@ export async function changePassword(email, password) {
 }
 
 // 인증 번호 이메일 전송하기
-export async function sendAuthenticationEmail(email) {
+export async function sendAuthenticationEmail(email, type) {
   if (email === '') {
     throw new CustomError(commonError.AUTHENTICATION_ERROR, `이메일을 입력해주세요.`, { statusCode: 400 });
   }
   let isOver = false;
 
-  //이미 가입된 이메일이 있는지 확인
-  const isEmailSaved = await User.findOne({ email });
+  if (type === 'signup') {
+    //이미 가입된 이메일이 있는지 확인
+    const isEmailSaved = await User.findOne({ email });
 
-  //이미 DB에 이메일이 있다면
-  if (isEmailSaved) {
-    throw new CustomError(commonError.AUTHENTICATION_ERROR, '이미 등록되어 있는 이메일입니다.', { statusCode: 409 });
+    //이미 DB에 이메일이 있다면
+    if (isEmailSaved) {
+      throw new CustomError(commonError.AUTHENTICATION_ERROR, '이미 등록되어 있는 이메일입니다.', { statusCode: 409 });
+    }
   }
 
   //이미 인증db에 정보가 있는지 확인

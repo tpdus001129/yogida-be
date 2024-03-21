@@ -27,7 +27,7 @@ export async function updateUser({ userId, nickname, profileImageSrc }) {
   const user = await User.findByIdAndUpdate(
     { _id: userId },
     { nickname, profileImageSrc },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true, select: { password: 0 } },
   )
     .lean()
     .catch((err) => {
@@ -37,7 +37,6 @@ export async function updateUser({ userId, nickname, profileImageSrc }) {
       });
     });
 
-  console.log(user);
   if (!user) {
     throw new CustomError(commonError.USER_UNKNOWN_ERROR, '해당 유저를 찾을 수 없습니다.', { statusCode: 403 });
   }

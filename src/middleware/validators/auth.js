@@ -26,8 +26,8 @@ export const signup = Joi.object({
           }),
       ),
     nickname: Joi.string().required(),
-    profileImageUrl: Joi.string(),
-    type: Joi.string(),
+    profileImageSrc: Joi.alternatives().try(Joi.string(), Joi.object()),
+    type: Joi.string().required(),
   }),
   query: Joi.object(),
   params: Joi.object(),
@@ -40,6 +40,16 @@ export const authMail = Joi.object({
       .error(
         (err) =>
           new CustomError(commonError.VALIDATION_ERROR, '올바른 이메일 형식이 아닙니다.', {
+            statusCode: 400,
+            cause: err,
+          }),
+      )
+      .required(),
+    type: Joi.string()
+      .valid('signup', 'change-password')
+      .error(
+        (err) =>
+          new CustomError(commonError.VALIDATION_ERROR, '타입을 확인해주세요.', {
             statusCode: 400,
             cause: err,
           }),

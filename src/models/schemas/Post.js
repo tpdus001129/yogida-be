@@ -1,16 +1,20 @@
 import mongoose, { Schema } from 'mongoose';
 
-const singleSchedule = new Schema({
+const scheduleSchema = new Schema({
+  // 게시물 아이디
+  postId: { type: Schema.Types.ObjectId, ref: 'Post' },
   // 장소
   placeName: { type: String, required: true },
   // 이미지
-  placeImageSrc: { type: String, required: true },
+  placeImageSrc: { type: String, default: 'default' },
   // 별점
   star: { type: Number, required: true },
   // 카테고리
   category: { type: String, required: true },
   //위도경도
   placePosition: [{ type: Number, required: true }],
+  // 날짜
+  day: { type: Number },
 });
 
 const postSchema = new Schema(
@@ -27,8 +31,6 @@ const postSchema = new Schema(
     endDate: { type: Date, required: true },
     // 게시글 태그들
     tag: { type: [String] },
-    // 여행 세부 장소들
-    schedules: { type: [[singleSchedule]], required: true },
     // 세부 장소들 사이 거리
     distances: { type: [[Number]], required: true },
     // 여행 경비
@@ -36,10 +38,7 @@ const postSchema = new Schema(
     // 여행 인원수
     peopleCount: { type: Number, required: true },
     // 게시글 공개 or 비공개 유무
-    isPublic: {
-      type: Boolean,
-      default: true,
-    },
+    isPublic: { type: Boolean, default: true },
     // 후기글
     reviewText: { type: String },
   },
@@ -48,7 +47,7 @@ const postSchema = new Schema(
   },
 );
 
-export const SingleSchedule = mongoose.model('SingleSchedule', singleSchedule);
+export const Schedule = mongoose.model('Schedule', scheduleSchema);
 const Post = mongoose.model('Post', postSchema);
 
 export default Post;

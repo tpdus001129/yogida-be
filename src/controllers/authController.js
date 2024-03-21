@@ -5,6 +5,7 @@ import * as userService from '../services/userService.js';
 import CustomError from '../middleware/errorHandler.js';
 import { createToken } from '../utils/jwt.js';
 import commonError from '../constants/errorConstant.js';
+import { jsonParser } from '../utils/common.js';
 
 // 로그인 URL 넘겨주는 함수 (인가 코드 요청 함수)
 export async function kakaoLogin(req, res) {
@@ -31,25 +32,40 @@ export async function kakaoAuthRedirectHandler(req, res) {
     res.cookie('token', token, {
       httpOnly: true,
     });
-    return res.status(302).redirect(`http://localhost:5173`);
+    return res.status(302).redirect(config.host.clientUri);
   } else {
     // 없다면 회원가입 페이지로 리다이렉트
     res.cookie('accessToken', data.access_token, {
       httpOnly: true,
     });
     // 추가 정보 받는 페이지로 리다이렉트~
-    return res.status(302).redirect(`http://localhost:5173/setup`);
+    return res.status(302).redirect(`${config.host.clientUri}/setup`);
   }
 }
 
 // 회원가입
 export async function signup(req, res) {
-  const { snsId, email, password, nickname, profileImageUrl, type } = req.body;
+  const payload = req.body.payload;
+
+  const parsedPayload = jsonParser(payload);
+
+  const { snsId, email, password, nickname, type, profileImageSrc: image } = parsedPayload;
+
   let token;
-  if (type === 'kakao') {
-    token = await authService.snsSignup(snsId, email, nickname, profileImageUrl);
+  let profileImageSrc;
+
+  if (req.file) {
+    // profileImageSrc = `/images/${req.file.filename}`;
+    // multer-s3용 코드
+    profileImageSrc = `${req.file.location}`;
   } else {
-    token = await authService.signup(email, password, nickname);
+    if (type === 'kakao') profileImageSrc = image;
+  }
+
+  if (type === 'kakao') {
+    token = await authService.snsSignup(snsId, email, nickname, profileImageSrc);
+  } else {
+    token = await authService.signup(email, password, nickname, profileImageSrc);
   }
 
   // 여기서 auth에 email로 찾아서 삭제한다.
@@ -64,7 +80,8 @@ export async function signup(req, res) {
 
 // 유저에게 인증메일 보내기
 export async function sendAuthEmail(req, res) {
-  await authService.sendAuthenticationEmail(req.body.email);
+  const { email, type } = req.body;
+  await authService.sendAuthenticationEmail(email, type);
   return res.status(200).json({ message: '전송 완료' });
 }
 
@@ -72,7 +89,11 @@ export async function sendAuthEmail(req, res) {
 export async function checkEmailCode(req, res) {
   const { email, authCode } = req.body;
   await authService.checkEmailCode({ email, authCode });
-
+  // 인증에 성공하면 토큰을 발급
+  const token = createToken(email, null, 300_000);
+  res.cookie('token', token, {
+    httpOnly: true,
+  });
   return res.status(200).json({ message: '인증번호 일치' });
 }
 
@@ -81,12 +102,12 @@ export async function login(req, res) {
   // body에서 이메일, 패스워드를 받아온다.
   const { email, password } = req.body;
 
-  const token = await authService.login(email, password, 'email');
+  const { token, user } = await authService.login(email, password, 'email');
 
   res.cookie('token', token, {
     httpOnly: true,
   });
-  return res.status(201).json({ message: '로그인 성공' });
+  return res.status(201).json({ message: '로그인 성공', user });
 }
 
 // 비밀번호 변경 하기
@@ -99,7 +120,7 @@ export async function changePassword(req, res) {
   if (user._id.toString() !== userId.toString()) {
     throw new CustomError('Password Change Error', '다른 유저의 비밀번호는 변경 할 수 없습니다.', { statusCode: 403 });
   }
-
+  res.clearCookie('token');
   await authService.changePassword(email, password);
   return res.status(200).json({ message: '변경 완료' });
 }
@@ -112,9 +133,6 @@ export async function logout(req, res) {
 
 // 로그인 상태 체크
 export async function me(req, res) {
-  console.log(req.user);
-  console.log(req.userId);
-
   return res.status(200).json({ user: req.user, userId: req.userId });
 }
 
@@ -135,6 +153,7 @@ export async function kakaoMe(req, res) {
 
 // 카카오 연결 끊기
 export async function kakaoUnlink(req, res) {
+  const userId = req.userId;
   const snsId = req.user.snsId;
   const bodyData = {
     target_id_type: 'user_id',
@@ -153,6 +172,9 @@ export async function kakaoUnlink(req, res) {
         cause: err,
       });
     });
+
+  await userService.deleteUser(userId);
+  res.clearCookie('token');
   return res.status(200).json({ message: '연결 해제 성공', snsId: result.data.id });
 }
 
@@ -160,7 +182,7 @@ export async function withdraw(req, res) {
   const userId = req.userId;
 
   await userService.deleteUser(userId);
-
+  res.clearCookie('token');
   return res.status(200).json({ message: '탈퇴 성공' });
 }
 

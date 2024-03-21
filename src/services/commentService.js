@@ -5,28 +5,59 @@ import Reply from '../models/schemas/Reply.js';
 
 // 1. 마이페이지에서 내가 썼던 댓글 조회
 export async function getAllCommentsByUserId(userId) {
-  const comments = await Comment.find({ authorId: userId }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
-      statusCode: 500,
-      cause: error,
-    });
-  });
-  const replies = await Reply.find({ authorId: userId }).catch((error) => {
-    throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+  const [comments, replies] = await Promise.all([
+    Comment.find({ authorId: userId })
+      .populate({
+        path: 'postId',
+        model: 'Post',
+        select: 'schedules.placeImageSrc',
+      })
+      .catch((error) => {
+        throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+          statusCode: 500,
+          cause: error,
+        });
+      }),
+    Reply.find({ authorId: userId })
+      .populate({
+        path: 'postId',
+        model: 'Post',
+        select: 'schedules.placeImageSrc',
+      })
+      .catch((error) => {
+        throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
+          statusCode: 500,
+          cause: error,
+        });
+      }),
+  ]).catch((error) => {
+    throw new CustomError(commonError.DB_ERROR, 'promise 실행 중 에러가 발생하였습니다.', {
       statusCode: 500,
       cause: error,
     });
   });
 
   const myComments = [...comments, ...replies];
-  myComments.sort((a, b) => a.createdAt - b.createdAt);
+  myComments.sort((a, b) => b.createdAt - a.createdAt);
   return myComments;
 }
 
 // 2. 게시물에 있는 댓글 조회
 export async function getCommentsByPostId(postId) {
   const comments = await Comment.find({ postId })
-    .populate('reply')
+    .populate({
+      path: 'authorId',
+      model: 'User',
+      select: 'nickname profileImageSrc',
+    })
+    .populate({
+      path: 'reply',
+      populate: {
+        path: 'authorId',
+        model: 'User',
+        select: 'nickname profileImageSrc',
+      },
+    })
     .catch((error) => {
       throw new CustomError(commonError.DB_ERROR, 'Internal server error', {
         statusCode: 500,
@@ -34,6 +65,7 @@ export async function getCommentsByPostId(postId) {
       });
     });
 
+  comments.sort((a, b) => b.createdAt - a.createdAt);
   return comments;
 }
 

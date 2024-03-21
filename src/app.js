@@ -6,8 +6,9 @@ import connectDB from './db/mongoose.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
-
 connectDB();
+
+app.use('/images', express.static('src/images'));
 
 app.use(express.json());
 app.use(cookieParser());

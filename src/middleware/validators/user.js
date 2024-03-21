@@ -2,15 +2,6 @@ import Joi from 'joi';
 import commonError from '../../constants/errorConstant.js';
 import CustomError from '../errorHandler.js';
 
-export const updateUser = Joi.object({
-  body: Joi.object({
-    nickname: Joi.string().optional(),
-    profileImageSrc: Joi.string().optional(),
-  }),
-  query: Joi.object(),
-  params: Joi.object(),
-});
-
 export const checkNickname = Joi.object({
   body: Joi.object({
     nickname: Joi.string()
@@ -36,6 +27,14 @@ export const checkEmail = Joi.object({
           cause: err,
         });
       }),
+  }),
+  query: Joi.object(),
+  params: Joi.object(),
+});
+
+export const updateUser = Joi.object({
+  body: Joi.object({
+    nickname: Joi.string(),
   }),
   query: Joi.object(),
   params: Joi.object(),

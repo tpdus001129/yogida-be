@@ -6,7 +6,7 @@ const sortList = new Map(['최신순', '오래된순', '찜많은순'].map((sort
 
 const tagList = new Map(
   [
-    '체험·엑티비티',
+    '체험·액티비티',
     'SNS 핫플레이스',
     '자연적인',
     '유명 관광지',
@@ -24,7 +24,7 @@ const tagList = new Map(
 );
 
 // 여기다에서 제공되는 여행 목록
-const cityList = new Map(
+export const cityList = new Map(
   [
     '국내',
     '가평·양평',
@@ -32,6 +32,12 @@ const cityList = new Map(
     '서울',
     '경주',
     '부산',
+    '대구',
+    '대전',
+    '부산',
+    '울산',
+    '광주',
+    '충북·세종',
     '여수',
     '인천',
     '전주',
@@ -127,6 +133,11 @@ export function checkSchedulePlaceAndDistances(schedules, distances) {
 export function getCommonAggregate() {
   return [
     {
+      $match: {
+        isPublic: true, // isPublic이 true인 문서만 선택
+      },
+    },
+    {
       $lookup: {
         from: 'likes',
         localField: '_id',
@@ -151,6 +162,14 @@ export function getCommonAggregate() {
       },
     },
     {
+      $lookup: {
+        from: 'schedules',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'schedules',
+      },
+    },
+    {
       $project: {
         authorId: 1,
         title: 1,
@@ -163,11 +182,57 @@ export function getCommonAggregate() {
         cost: 1,
         peopleCount: 1,
         likeCount: { $size: '$likes' },
-        CommentCount: { $add: [{ $size: '$comments' }, { $size: '$replies' }] },
+        commentCount: { $add: [{ $size: '$comments' }, { $size: '$replies' }] },
         isPublic: 1,
         reviewText: 1,
         createdAt: 1,
         updatedAt: 1,
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+  ];
+}
+
+export function getCommonAggregateByUserId(userId) {
+  return [
+    {
+      $match: {
+        authorId: userId,
+      },
+    },
+    {
+      $lookup: {
+        from: 'schedules',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'schedules',
+      },
+    },
+    {
+      $project: {
+        authorId: 1,
+        title: 1,
+        destination: 1,
+        startDate: 1,
+        endDate: 1,
+        tag: 1,
+        schedules: 1,
+        distances: 1,
+        cost: 1,
+        peopleCount: 1,
+        isPublic: 1,
+        reviewText: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
       },
     },
   ];

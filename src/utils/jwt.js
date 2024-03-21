@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
 import CustomError from '../middleware/errorHandler.js';
 
-export function createToken(email, nickname) {
+export function createToken(email, nickname, expiresSec = config.jwt.expiresSec) {
   return jwt.sign({ email, nickname }, config.jwt.secretKey, {
-    expiresIn: config.jwt.expiresSec,
+    expiresIn: expiresSec,
   });
 }
 
